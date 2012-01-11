@@ -4,7 +4,7 @@ library(sciplot)  #for bargraph.CI()
 library(psych)
 
 #load data
-jnm <- read.table("http://swift.cbdr.cmu.edu/open/JNM-Data-2010-07-30.csv", header=TRUE, sep=",")
+jnm <- read.table("http://swift.cbdr.cmu.edu/data/JNM-data-2010-07-30.csv", header=TRUE, sep=",")
 
 #transform data
 jnm$OfferCount <- jnm$OfferCount - 1                #adjust the values of OfferCount since option 1 = 0

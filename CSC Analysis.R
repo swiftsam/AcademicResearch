@@ -1,8 +1,8 @@
 #load data
-csc <- read.csv("~/Documents/Research/Negotiation - Self Perception/CSC/data/CSC-CSBA Data-2011-12-01.csv", stringsAsFactors=FALSE)
+csc <- read.csv("http://swift.cbdr.cmu.edu/data/CSC-data-2011-12-01.csv", stringsAsFactors=FALSE)
 
 #rename variables and delete uneeded columns
-source("~/Documents/Research/Negotiation - Self Perception/CSC/analysis/CSC-CSBA data prep.R")
+source("CSC Data Prep.R")
 
 #set correct data types
 csc$ArgCond <- factor(csc$ArgCond,levels=c("None","Free","OwnLow","OtherHigh","OwnBatna","OtherBatna"))

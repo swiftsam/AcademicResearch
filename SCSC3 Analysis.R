@@ -10,7 +10,7 @@ library(reshape2)
 library(psych)
 
 ####Experiment 1 (Project Code: scsc3)####
-s3 <- read.csv("http://swift.cbdr.cmu.edu/open/SCSC3-2006-10-10.csv")
+s3 <- read.csv("http://swift.cbdr.cmu.edu/data/SCSC3-2006-10-10.csv")
 #column label code ... [item][Candidate number][disposition condition][situation condition]
 #example "Success.CA.GH.IH" = Success rating, Candidate A, Grades:High, Inflation:High
 

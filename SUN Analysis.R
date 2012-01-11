@@ -2,7 +2,7 @@
 library(psych)
 
 #import data
-sun.i <- read.csv("~/Documents/Research/Self Perception in Negotiation/SUN/data/SUN data indiv 2011-01-30.txt")
+sun.i <- read.csv("http://swift.cbdr.cmu.edu/data/SUN-data-indiv-2011-01-30.csv")
 attach(sun.i)
 
 #clean data
