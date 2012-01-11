@@ -1,0 +1,125 @@
+GET DATA /TYPE=XLSX 
+  /FILE='T:\files\docs\Research\SUN2\data and analysis\SUN2 Data 2009-07-28.xlsx' 
+  /SHEET=name 'Dyadic' 
+  /CELLRANGE=full 
+  /READNAMES=on 
+  /ASSUMEDSTRWIDTH=32767. 
+DATASET NAME Dyadic WINDOW=FRONT.
+
+RECODE Condition ('BSSS'=0) ('BSST'=1) ('BTSS'=2) ('BTST'=3) INTO CondCode.
+RECODE Condition ('BSSS'=0) ('BSST'=0) ('BTSS'=1) ('BTST'=1) INTO BT.
+RECODE Condition ('BSSS'=0) ('BSST'=1) ('BTSS'=0) ('BTST'=1) INTO ST.
+RECODE RP_overlap (0 thru Highest=0) (ELSE=1) INTO Impasse. 
+VARIABLE LABELS  CondCode 'Condition Code'. 
+VARIABLE LABELS  BT 'Buyer Talks'. 
+VARIABLE LABELS  ST 'Seller Talks'. 
+EXECUTE.
+
+COMPUTE RP_overlap=B_RP-S_RP. 
+VARIABLE LABELS  RP_overlap 'Reservation Price Overlap'. 
+EXECUTE.
+
+COMPUTE Retail_overlap=B_Retail_Sum-S_Retail_Sum. 
+VARIABLE LABELS  Retail_overlap 'Retail Price Overlap'. 
+EXECUTE.
+
+COMPUTE AvgPrice_overlap=B_AvgPrice-S_AvgPrice. 
+VARIABLE LABELS  Retail_overlap 'Retail Price Overlap'. 
+EXECUTE.
+
+ **Exclude questionable cases ** 
+USE ALL. 
+COMPUTE filter_$=(Potential_Exclude < 1). 
+VARIABLE LABEL filter_$ 'Potential_Exclude < 1 (FILTER)'. 
+VALUE LABELS filter_$ 0 'Not Selected' 1 'Selected'. 
+FORMAT filter_$ (f1.0). 
+FILTER BY filter_$. 
+EXECUTE.
+
+
+*/ Reservation Price Overlap */
+
+ONEWAY RP_overlap BY CondCode 
+  /MISSING ANALYSIS.
+
+UNIANOVA RP_overlap BY ST BT 
+  /METHOD=SSTYPE(3) 
+  /INTERCEPT=EXCLUDE 
+  /PLOT=PROFILE(ST*BT) 
+  /EMMEANS=TABLES(ST) 
+  /EMMEANS=TABLES(BT) 
+  /EMMEANS=TABLES(ST*BT) 
+  /PRINT=DESCRIPTIVE 
+  /PLOT=RESIDUALS 
+  /CRITERIA=ALPHA(.05) 
+  /DESIGN=ST BT ST*BT.
+
+UNIANOVA RP_overlap BY ST BT 
+  /METHOD=SSTYPE(3) 
+  /INTERCEPT=EXCLUDE 
+  /PLOT=PROFILE(ST*BT) 
+  /EMMEANS=TABLES(ST) 
+  /EMMEANS=TABLES(BT) 
+  /EMMEANS=TABLES(ST*BT) 
+  /PRINT=DESCRIPTIVE 
+  /PLOT=RESIDUALS 
+  /CRITERIA=ALPHA(.05) 
+  /DESIGN=ST BT.
+
+*/ Retail Price Overlap */
+
+ONEWAY Retail_overlap BY CondCode 
+  /MISSING ANALYSIS.
+
+UNIANOVA Retail_overlap BY ST BT 
+  /METHOD=SSTYPE(3) 
+  /INTERCEPT=EXCLUDE 
+  /PLOT=PROFILE(ST*BT) 
+  /EMMEANS=TABLES(ST) 
+  /EMMEANS=TABLES(BT) 
+  /EMMEANS=TABLES(ST*BT) 
+  /PRINT=DESCRIPTIVE 
+  /PLOT=RESIDUALS 
+  /CRITERIA=ALPHA(.05) 
+  /DESIGN=ST BT ST*BT.
+
+UNIANOVA Retail_overlap BY ST BT 
+  /METHOD=SSTYPE(3) 
+  /INTERCEPT=EXCLUDE 
+  /PLOT=PROFILE(ST*BT) 
+  /EMMEANS=TABLES(ST) 
+  /EMMEANS=TABLES(BT) 
+  /EMMEANS=TABLES(ST*BT) 
+  /PRINT=DESCRIPTIVE 
+  /PLOT=RESIDUALS 
+  /CRITERIA=ALPHA(.05) 
+  /DESIGN=ST BT.
+
+*/ Average Price Overlap */
+
+ONEWAY AvgPrice_overlap BY CondCode 
+  /MISSING ANALYSIS.
+
+UNIANOVA AvgPrice_overlap BY ST BT 
+  /METHOD=SSTYPE(3) 
+  /INTERCEPT=EXCLUDE 
+  /PLOT=PROFILE(ST*BT) 
+  /EMMEANS=TABLES(ST) 
+  /EMMEANS=TABLES(BT) 
+  /EMMEANS=TABLES(ST*BT) 
+  /PRINT=DESCRIPTIVE 
+  /PLOT=RESIDUALS 
+  /CRITERIA=ALPHA(.05) 
+  /DESIGN=ST BT ST*BT.
+
+UNIANOVA AvgPrice_overlap BY ST BT 
+  /METHOD=SSTYPE(3) 
+  /INTERCEPT=EXCLUDE 
+  /PLOT=PROFILE(ST*BT) 
+  /EMMEANS=TABLES(ST) 
+  /EMMEANS=TABLES(BT) 
+  /EMMEANS=TABLES(ST*BT) 
+  /PRINT=DESCRIPTIVE 
+  /PLOT=RESIDUALS 
+  /CRITERIA=ALPHA(.05) 
+  /DESIGN=ST BT.
