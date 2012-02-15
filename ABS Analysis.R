@@ -1,8 +1,9 @@
 library(plyr)
 library(ggplot2)
+library(psych)
 
 #load data
-ABS <- read.csv("~/research/ABS.csv", stringsAsFactors=F, na.strings=c(""))
+ABS <- read.csv("ABS.csv", stringsAsFactors=F, na.strings=c(""))
 #remove uncessary columns
 ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
                                "Consent1","Consent2","Consent3","Consent4",
@@ -79,8 +80,31 @@ ABS <- ABS[,!names(ABS) %in% c("BScenTime_3","SScenTime_3",
                                "BSVWant","SSVWant","BSVExcite","SSVExcite",
                                "BResSat","SResSat","BResFair","SResFair","BResAccept","SResAccept")]
 
+#create composite measures
+alpha(ABS[,c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")])
+ABS$sv <- rowMeans(ABS[,c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")], na.rm=TRUE)
+
+alpha(ABS[,c("ResSat","ResFair")])
+ABS$ResReact <- rowMeans(ABS[,c("ResSat","ResFair")])
+
+#Salvage data by analyzing only sellers
 sellers <- ABS[ABS$RoleCond=="Seller",]
+
+#Does the decision to accept the offer vay by condition?
 table(sellers$ArgCond, sellers$ResAccept)
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=sellers))
 chisq.test(sellers$ArgCond, sellers$ResAccept)
+
+#Does subjective value of the car vary by condition? No
+summary(aov(sv ~ ArgCond, data=sellers))
+qplot(ArgCond,sv,data=sellers,geom="boxplot")
+
+#Does reaction to the offer vary by condition? No
+summary(aov(ResReact ~ ArgCond, data=sellers))
+qplot(ArgCond,ResReact,data=sellers,geom="boxplot")
+
+#Does RP vary by condition?
+summary(aov(RP ~ ArgCond, data=sellers))
+qplot(ArgCond,RP,data=sellers,geom="boxplot")
+
 
