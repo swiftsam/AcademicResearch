@@ -1,4 +1,5 @@
 library(plyr)
+library(ggplot2)
 
 #load data
 ABS <- read.csv("~/research/ABS.csv", stringsAsFactors=F, na.strings=c(""))
@@ -69,6 +70,7 @@ ABS$ResFair[is.na(ABS$ResFair)] <- ABS$SResFair[is.na(ABS$ResFair)]
 ABS$ResAccept <- rep(NA,nrow(ABS))
 ABS$ResAccept[is.na(ABS$ResAccept)] <- ABS$BResAccept[is.na(ABS$ResAccept)]
 ABS$ResAccept[is.na(ABS$ResAccept)] <- ABS$SResAccept[is.na(ABS$ResAccept)]
+ABS$ResAccept <- factor(ABS$ResAccept,labels=c("Accept","Reject"))
                                          
 ABS <- ABS[,!names(ABS) %in% c("BScenTime_3","SScenTime_3",
                                "BArg","SArg","BNoArg","SNoArg",
@@ -76,4 +78,9 @@ ABS <- ABS[,!names(ABS) %in% c("BScenTime_3","SScenTime_3",
                                "BRP","SRP",
                                "BSVWant","SSVWant","BSVExcite","SSVExcite",
                                "BResSat","SResSat","BResFair","SResFair","BResAccept","SResAccept")]
+
+sellers <- ABS[ABS$RoleCond=="Seller",]
+table(sellers$ArgCond, sellers$ResAccept)
+summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=sellers))
+chisq.test(sellers$ArgCond, sellers$ResAccept)
 
