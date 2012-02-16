@@ -2,8 +2,13 @@ library(plyr)
 library(ggplot2)
 library(psych)
 
+####### ---------------------------------
+#######  Data Prep
+####### ---------------------------------
+
 #load data
 ABS <- read.csv("ABS.csv", stringsAsFactors=F, na.strings=c(""))
+ABS$ID <- row
 #remove uncessary columns
 ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
                                "Consent1","Consent2","Consent3","Consent4",
@@ -16,6 +21,9 @@ ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
                                "X")]
 #rename unnamed columns
 ABS <- rename(ABS, c("V6"="IP","V8"="Starttime","V9"="Endtime","Q58"="SSVWant","Q59"="SSVExcite"))
+
+#add simple IDs for each record
+ABS$ID <- factor(c(1:nrow(ABS)))
 
 #Set conditions and factors
 ABS$RoleCond[is.na(ABS$RoleCond)] <- ABS$RoieCond[is.na(ABS$RoleCond)] #correcting typo in qualtrics
@@ -80,13 +88,81 @@ ABS <- ABS[,!names(ABS) %in% c("BScenTime_3","SScenTime_3",
                                "BSVWant","SSVWant","BSVExcite","SSVExcite",
                                "BResSat","SResSat","BResFair","SResFair","BResAccept","SResAccept")]
 
-#create composite measures
+####### ---------------------------------
+#######  Sample Characteristics
+####### ---------------------------------
+ABS$DemGeo <- factor(ABS$DemGeo)
+str(ABS$DemGeo)
+ABS$DemGen <- factor(ABS$DemGen, labels=c("Male","Female"))
+table(ABS$DemGen)
+ABS$DemYOB <- ABS$DemYOB+1919  #values start at 1920=1
+ABS$DemAge <- 2012 - ABS$DemYOB
+describe(ABS$DemAge)
+table(ABS$src)
+ABS$DemLang <- factor(tolower(ABS$DemLang))
+length(ABS$DemLang)
+table(ABS$DemLang)
+
+####### ---------------------------------
+#######  Calculated Variables
+####### ---------------------------------
+ABS$ArgChars <- nchar(ABS$Arg)  #character count of arguments written
+
+ABS <- ABS[order(ABS$Starttime),]
+ABS$IPdup <- duplicated(ABS$IP)  
+ABS$Emaildup <- duplicated(ABS$Email,incomparables= c(NA))
+
+ABS$Starttime <- as.POSIXct(ABS$Starttime)
+ABS$Endtime   <- as.POSIXct(ABS$Endtime)
+ABS$TotalTime <- as.double((ABS$Starttime - ABS$Endtime)/-60) #number of positive minutes between start- and end- time
+
+####### ---------------------------------
+#######  Exclusion Criteria
+####### ---------------------------------
+#total study completion time
+describe.by(ABS$TotalTime,group=ABS$ArgCond)
+#qplot(ABS$TotalTime, geom="histogram", group=ABS$ArgCond, fill=ABS$ArgCond, xlim=c(0,30), binwidth=1, position="dodge")
+length(ABS$ID[ABS$TotalTime<1]) 
+ABS <- subset(ABS,ABS$TotalTime>1)
+
+#Time spent reading scenario
+describe(ABS$ScenTime)
+#qplot(ABS$ScenTime, geom="histogram", xlim=c(0,150))
+length(ABS$ID[ABS$ScenTime<10])
+ABS <- subset(ABS,ABS$ScenTime > 10)
+
+#Time spent writing argument
+describe.by(ABS$ArgTime, group=ABS$ArgCond)
+#qplot(ABS$ArgTime[ABS$ArgCond=="Arg"], geom="histogram", xlim=c(0,1000))
+length(ABS$ID[ABS$ArgCond=="Arg" & ABS$ArgTime<15])
+
+#Length of argument written
+describe(ABS$ArgChars[ABS$ArgCond=="Arg"])
+#qplot(ABS$ArgChars[ABS$ArgCond=="Arg"], geom="histogram", binwidth=10)
+length(ABS$ID[ABS$ArgCond=="Arg" & ABS$ArgChars<10])
+ABS <- subset(ABS,xor(ABS$ArgCond=="NoArg", ABS$ArgChars>10))
+
+#Check allocation to conditions
+table(ABS$ArgCond, ABS$RoleCond)
+
+####### ---------------------------------
+#######  Create composite measures
+####### ---------------------------------
+
+#Subjective Utility of Car, 5 items
 alpha(ABS[,c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")])
 ABS$sv <- rowMeans(ABS[,c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")], na.rm=TRUE)
 
+#Reaction to counterpart's response, 2 items
 alpha(ABS[,c("ResSat","ResFair")])
 ABS$ResReact <- rowMeans(ABS[,c("ResSat","ResFair")])
 
+####### ---------------------------------
+#######  Hypothesis Tests
+####### ---------------------------------
+
+#Qualtrics survey flow error resulted in most DV measures being shown only to Sellers
+#See if you can spot the error: http://i.imgur.com/nqtkc.png
 #Salvage data by analyzing only sellers
 sellers <- ABS[ABS$RoleCond=="Seller",]
 
@@ -95,11 +171,11 @@ table(sellers$ArgCond, sellers$ResAccept)
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=sellers))
 chisq.test(sellers$ArgCond, sellers$ResAccept)
 
-#Does subjective value of the car vary by condition? No
+#Does subjective value of the car vary by condition?
 summary(aov(sv ~ ArgCond, data=sellers))
 qplot(ArgCond,sv,data=sellers,geom="boxplot")
 
-#Does reaction to the offer vary by condition? No
+#Does reaction to the offer vary by condition?
 summary(aov(ResReact ~ ArgCond, data=sellers))
 qplot(ArgCond,ResReact,data=sellers,geom="boxplot")
 
