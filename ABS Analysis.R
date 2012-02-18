@@ -122,7 +122,9 @@ ABS$Emaildup <- duplicated(ABS$Email,incomparables= c(NA))
 
 ABS$Starttime <- as.POSIXct(ABS$Starttime)
 ABS$Endtime   <- as.POSIXct(ABS$Endtime)
-ABS$TotalTime <- as.double((ABS$Starttime - ABS$Endtime)/-60) #number of positive minutes between start- and end- time
+ABS$TotalTime <- -as.double(ABS$Starttime - ABS$Endtime) #number of seconds between start- and end- time
+
+ABS$OtherTime <- ABS$TotalTime - ABS$ArgTime #number of seconds doing everything other than the arg
 
 ####### ---------------------------------
 #######  Exclusion Criteria
@@ -130,8 +132,8 @@ ABS$TotalTime <- as.double((ABS$Starttime - ABS$Endtime)/-60) #number of positiv
 #total study completion time
 describe.by(ABS$TotalTime,group=ABS$ArgCond)
 #qplot(ABS$TotalTime, geom="histogram", group=ABS$ArgCond, fill=ABS$ArgCond, xlim=c(0,30), binwidth=1, position="dodge")
-length(ABS$ID[ABS$TotalTime<1]) 
-ABS <- subset(ABS,ABS$TotalTime>1)
+length(ABS$ID[ABS$TotalTime<60]) 
+ABS <- subset(ABS,ABS$TotalTime>60)
 
 #Time spent reading scenario
 describe(ABS$ScenTime)
@@ -198,6 +200,9 @@ ABS$ResReact <- rowMeans(
 #Does subjective value of the car vary by condition?
 summary(aov(sv3 ~ ArgCond*RoleCond, data=ABS))
 bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS, legend=T)
+sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS))
+
+
 
 #Qualtrics survey flow error resulted in most DV measures being shown only to Sellers
 #See if you can spot the error: http://i.imgur.com/nqtkc.png
@@ -212,6 +217,7 @@ chisq.test(sellers$ArgCond, sellers$ResAccept)
 #Does subjective value of the car vary by condition?
 summary(aov(sv5 ~ ArgCond, data=sellers))
 bargraph.CI(ArgCond,sv5,data=sellers)
+sv5.lm <- (lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ABS))
 
 #Does reaction to the offer vary by condition?
 summary(aov(ResReact ~ ArgCond, data=sellers))
