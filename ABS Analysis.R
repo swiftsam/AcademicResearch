@@ -1,5 +1,6 @@
 library(plyr)
 library(ggplot2)
+library(sciplot)
 library(psych)
 
 ####### ---------------------------------
@@ -8,7 +9,7 @@ library(psych)
 
 #load data
 ABS <- read.csv("ABS.csv", stringsAsFactors=F, na.strings=c(""))
-ABS$ID <- row
+ABS$ID <- factor(c(1:nrow(ABS)))
 #remove uncessary columns
 ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
                                "Consent1","Consent2","Consent3","Consent4",
@@ -103,6 +104,13 @@ ABS$DemLang <- factor(tolower(ABS$DemLang))
 length(ABS$DemLang)
 table(ABS$DemLang)
 
+ABS$DemOwnCar <- factor(ABS$DemOwnCar, labels=c("OwnsCar","DoesNotOwnCar"))
+ABS$DemCarPurc <- factor(ABS$DemCarPurc, labels=c("HavePurchased","HaveNotPurchased"))
+carbuyers <- subset(ABS, ABS$DemCarPurc=="HavePurchased")
+colSums(carbuyers[c("DemCarPTyp_1","DemCarPTyp_2","DemCarPTyp_3","DemCarPTyp_4")],na.rm=T)
+
+ABS$DemAffect <- factor(ABS$DemAffect, label=c("Like More","No Change","Like Less"))
+
 ####### ---------------------------------
 #######  Calculated Variables
 ####### ---------------------------------
@@ -150,37 +158,72 @@ table(ABS$ArgCond, ABS$RoleCond)
 ####### ---------------------------------
 
 #Subjective Utility of Car, 5 items
+# reverse score seller ratings of wanting to sell and being excited to sell
+ABS$SVWant[ABS$RoleCond=="Seller"] <- 8-ABS$SVWant[ABS$RoleCond=="Seller"]
+ABS$SVExcite[ABS$RoleCond=="Seller"] <- 8-ABS$SVExcite[ABS$RoleCond=="Seller"]
+
+alpha(ABS[,c("SVAttr","SVFav","SVShowoff")])
+ABS$sv3 <- rowMeans(
+  data.frame(
+    scale(ABS$SVAttr),
+    scale(ABS$SVFav),
+    scale(ABS$SVShowoff)
+    ),
+  na.rm=TRUE)
+
 alpha(ABS[,c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")])
-ABS$sv <- rowMeans(ABS[,c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")], na.rm=TRUE)
+ABS$sv5 <- rowMeans(
+  data.frame(
+    scale(ABS$SVAttr),
+    scale(ABS$SVFav),
+    scale(ABS$SVShowoff),
+    scale(ABS$SVWant),
+    scale(ABS$SVExcite)
+    ),
+  na.rm=TRUE)
 
 #Reaction to counterpart's response, 2 items
 alpha(ABS[,c("ResSat","ResFair")])
-ABS$ResReact <- rowMeans(ABS[,c("ResSat","ResFair")])
+ABS$ResReact <- rowMeans(
+  data.frame(
+    scale(ABS$ResSat),
+    scale(ABS$ResFair)
+    ),
+  na.rm=TRUE)  
 
 ####### ---------------------------------
 #######  Hypothesis Tests
 ####### ---------------------------------
+
+#Does subjective value of the car vary by condition?
+summary(aov(sv3 ~ ArgCond*RoleCond, data=ABS))
+bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS, legend=T)
 
 #Qualtrics survey flow error resulted in most DV measures being shown only to Sellers
 #See if you can spot the error: http://i.imgur.com/nqtkc.png
 #Salvage data by analyzing only sellers
 sellers <- ABS[ABS$RoleCond=="Seller",]
 
-#Does the decision to accept the offer vay by condition?
+#Does the decision to accept the offer vary by condition?
 table(sellers$ArgCond, sellers$ResAccept)
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=sellers))
 chisq.test(sellers$ArgCond, sellers$ResAccept)
 
 #Does subjective value of the car vary by condition?
-summary(aov(sv ~ ArgCond, data=sellers))
-qplot(ArgCond,sv,data=sellers,geom="boxplot")
+summary(aov(sv5 ~ ArgCond, data=sellers))
+bargraph.CI(ArgCond,sv5,data=sellers)
 
 #Does reaction to the offer vary by condition?
 summary(aov(ResReact ~ ArgCond, data=sellers))
-qplot(ArgCond,ResReact,data=sellers,geom="boxplot")
+bargraph.CI(ArgCond,ResReact,data=sellers)
 
 #Does RP vary by condition?
 summary(aov(RP ~ ArgCond, data=sellers))
-qplot(ArgCond,RP,data=sellers,geom="boxplot")
+bargraph.CI(ArgCond,RP,data=sellers)
 
-
+#Does Satisfaction with participants' own actual car vary by condition?
+table(ABS$DemOwnCar)
+carowners <- subset(ABS,ABS$DemOwnCar=="OwnsCar")
+summary(aov(DemCarSat ~ ArgCond*RoleCond, data=carowners))
+bargraph.CI(RoleCond, DemCarSat, group=ArgCond, data=carowners, legend=T, y.leg=7, x.leg=1, ylim=c(1,7))
+describe.by(ABS$DemCarSat, ABS$RoleCond)
