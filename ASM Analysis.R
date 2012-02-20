@@ -1,6 +1,11 @@
 library(plyr)
 library(ggplot2)
+library(sciplot)
 library(psych)
+
+####### ---------------------------------
+#######  Data Prep
+####### ---------------------------------
 
 #load data
 ASM <- read.csv("ASM.csv", stringsAsFactors=F, na.strings=c(""))
@@ -14,10 +19,18 @@ ASM <- ASM[,!names(ASM) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
                                "BNoArgExpT_1","BNoArgExpT_2","BNoArgExpT_4",
                                "BArgExpTim_1","BArgExpTim_2","BArgExpTim_4","BArgExp",
                                "X")]
+
+#rename unnamed and poorly columns
 ASM <- rename(ASM, c("V6"="IP","V8"="Starttime","V9"="Endtime",
                      "Q65"="IssWSafe","Q66"="IssWFuel",
-                     "BScenTime_3"="ScenarioTime","BArgExpTim_3"="ArgExposureTime"))
+                     "BScenTime_3"="ScenTime","BArgExpTim_3"="ArgExposureTime",
+                     "BArg"="Arg","BSVWant"="SVWant","BSVExcite"="SVExcite","BRP"="RP",
+                     "BResSat"="ResSat","BResFair"="ResFair","BResAccept"="ResAccept"))
 
+#add simple IDs for each record
+ASM$ID <- factor(c(1:nrow(ASM)))
+
+#Set conditions and factors
 ASM$ArgCond <- rep(NA, nrow(ASM))
 ASM$ArgCond[which(ASM$BArgTime_3>0)] <- "Arg"
 ASM$ArgCond[which(ASM$BNoArgTime_3>0)] <- "NoArg"
@@ -38,7 +51,87 @@ ASM$ArgTime[is.na(ASM$ArgTime)] <- ASM$BNoArgTime_3[is.na(ASM$ArgTime)]
 ASM$ArgTime[is.na(ASM$ArgTime)] <- ASM$BNoArgExpT_3[is.na(ASM$ArgTime)]
 ASM <- ASM[,!names(ASM) %in% c("BArgTime_3","BNoArgTime_3","BNoArgExpT_3")]
 
-#create composite measures
+####### ---------------------------------
+#######  Sample Characteristics
+####### ---------------------------------
+ASM$DemGeo <- factor(ASM$DemGeo)
+str(ASM$DemGeo)
+ASM$DemGen <- factor(ASM$DemGen, labels=c("Male","Female"))
+table(ASM$DemGen)
+ASM$DemYOB <- ASM$DemYOB+1919  #values start at 1920=1
+ASM$DemAge <- 2012 - ASM$DemYOB
+describe(ASM$DemAge)
+table(ASM$src)
+ASM$DemLang <- factor(tolower(ASM$DemLang))
+length(ASM$DemLang)
+table(ASM$DemLang)
+
+ASM$DemOwnCar <- factor(ASM$DemOwnCar, labels=c("OwnsCar","DoesNotOwnCar"))
+ASM$DemCarPurc <- factor(ASM$DemCarPurc, labels=c("HavePurchased","HaveNotPurchased"))
+carbuyers <- subset(ASM, ASM$DemCarPurc=="HavePurchased")
+colSums(carbuyers[c("DemCarPTyp_1","DemCarPTyp_2","DemCarPTyp_3","DemCarPTyp_4")],na.rm=T)
+
+ASM$DemAffect <- factor(ASM$DemAffect, label=c("Like More","No Change","Like Less"))
+
+####### ---------------------------------
+#######  Calculated Variables
+####### ---------------------------------
+ASM$ArgChars <- nchar(ASM$Arg)  #character count of arguments written
+
+ASM <- ASM[order(ASM$Starttime),]
+ASM$IPdup <- duplicated(ASM$IP)  
+ASM$Emaildup <- duplicated(ASM$Email,incomparables= c(NA))
+
+ASM$Starttime <- as.POSIXct(ASM$Starttime)
+ASM$Endtime   <- as.POSIXct(ASM$Endtime)
+ASM$TotalTime <- -as.double(ASM$Starttime - ASM$Endtime) #number of seconds between start- and end- time
+
+ASM$OtherTime <- ASM$TotalTime - ASM$ArgTime #number of seconds doing everything other than the arg
+
+####### ---------------------------------
+#######  Exclusion Criteria
+####### ---------------------------------
+#duplicate emails
+length(ASM$ID[ASM$Emaildup])
+ASM <- subset(ASM,ASM$Emaildup == FALSE)
+
+#duplicate IP address
+length(ASM$ID[ASM$IPdup])
+#ASM <- subset(ASM,ASM$Emaildup == FALSE)
+
+#total study completion time
+describe.by(ASM$TotalTime,group=ASM$ArgCond)
+qplot(ASM$TotalTime, geom="histogram", group=ASM$ArgCond, fill=ASM$ArgCond, xlim=c(0,1500), binwidth=30, position="dodge")
+length(ASM$ID[ASM$TotalTime<60]) 
+ASM <- subset(ASM,ASM$TotalTime>60)
+
+#Time spent reading scenario
+describe(ASM$ScenTime)
+#qplot(ASM$ScenTime, geom="histogram", xlim=c(0,150))
+length(ASM$ID[ASM$ScenTime<10])
+ASM <- subset(ASM,ASM$ScenTime > 10)
+
+#Time spent writing argument
+describe.by(ASM$ArgTime, group=ASM$ArgCond)
+qplot(ASM$ArgTime[ASM$ArgCond=="Arg"], geom="histogram", xlim=c(0,350))
+length(ASM$ID[ASM$ArgCond=="Arg" & ASM$ArgTime<15])
+
+#Length of argument written
+describe(ASM$ArgChars[ASM$ArgCond=="Arg"])
+#qplot(ASM$ArgChars[ASM$ArgCond=="Arg"], geom="histogram", binwidth=10)
+length(ASM$ID[ASM$ArgCond=="Arg" & ASM$ArgChars<10])
+ASM <- subset(ASM,xor(xor(ASM$ArgCond=="NoArg", ASM$ArgCond=="ArgExp"), ASM$ArgChars>10))
+
+#Check allocation to conditions
+table(ASM$ArgCond)
+
+#write potential lottery winners to file
+#write.csv(ASM[!is.na(ASM$Email),c("Email","src")],"ASM-lottery.csv")
+
+
+####### ---------------------------------
+#######  Create composite measures
+####### ---------------------------------
 alpha(ASM[,c("SVAttr","SVFav","SVShowoff","BSVWant","BSVExcite")])
 ASM$sv <- rowMeans(ASM[,c("SVAttr","SVFav","SVShowoff","BSVWant","BSVExcite")], na.rm=TRUE)
 

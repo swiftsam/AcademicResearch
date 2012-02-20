@@ -9,7 +9,7 @@ library(psych)
 
 #load data
 ABS <- read.csv("ABS.csv", stringsAsFactors=F, na.strings=c(""))
-ABS$ID <- factor(c(1:nrow(ABS)))
+
 #remove uncessary columns
 ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
                                "Consent1","Consent2","Consent3","Consent4",
@@ -129,6 +129,14 @@ ABS$OtherTime <- ABS$TotalTime - ABS$ArgTime #number of seconds doing everything
 ####### ---------------------------------
 #######  Exclusion Criteria
 ####### ---------------------------------
+#duplicate emails
+length(ABS$ID[ABS$Emaildup])
+ABS <- subset(ABS,ABS$Emaildup == FALSE)
+
+#duplicate IP address
+length(ABS$ID[ABS$IPdup])
+#ABS <- subset(ABS,ABS$Emaildup == FALSE)
+
 #total study completion time
 describe.by(ABS$TotalTime,group=ABS$ArgCond)
 #qplot(ABS$TotalTime, geom="histogram", group=ABS$ArgCond, fill=ABS$ArgCond, xlim=c(0,30), binwidth=1, position="dodge")
@@ -154,6 +162,9 @@ ABS <- subset(ABS,xor(ABS$ArgCond=="NoArg", ABS$ArgChars>10))
 
 #Check allocation to conditions
 table(ABS$ArgCond, ABS$RoleCond)
+
+#write potential lottery winners to file
+write.csv(ABS[!is.na(ABS$Email),c("Email","src")],"ABS-lottery.csv")
 
 ####### ---------------------------------
 #######  Create composite measures
