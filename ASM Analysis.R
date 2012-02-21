@@ -37,6 +37,7 @@ ASM$ArgCond[which(ASM$BNoArgTime_3>0)] <- "NoArg"
 ASM$ArgCond[which(ASM$BNoArgExpT_3>0)] <- "ArgExp"
 ASM$ArgCond <- factor(ASM$ArgCond)
 ASM$src <-factor(ASM$src)
+ASM$ResAccept <- factor(ASM$ResAccept,labels=c("Accept","Reject"))
 
 #Check allocation to conditions
 table(ASM$ArgCond)
@@ -101,7 +102,7 @@ length(ASM$ID[ASM$IPdup])
 
 #total study completion time
 describe.by(ASM$TotalTime,group=ASM$ArgCond)
-qplot(ASM$TotalTime, geom="histogram", group=ASM$ArgCond, fill=ASM$ArgCond, xlim=c(0,1500), binwidth=30, position="dodge")
+#qplot(ASM$TotalTime, geom="histogram", group=ASM$ArgCond, fill=ASM$ArgCond, xlim=c(0,1500), binwidth=30, position="dodge")
 length(ASM$ID[ASM$TotalTime<60]) 
 ASM <- subset(ASM,ASM$TotalTime>60)
 
@@ -113,7 +114,7 @@ ASM <- subset(ASM,ASM$ScenTime > 10)
 
 #Time spent writing argument
 describe.by(ASM$ArgTime, group=ASM$ArgCond)
-qplot(ASM$ArgTime[ASM$ArgCond=="Arg"], geom="histogram", xlim=c(0,350))
+#qplot(ASM$ArgTime[ASM$ArgCond=="Arg"], geom="histogram", xlim=c(0,350))
 length(ASM$ID[ASM$ArgCond=="Arg" & ASM$ArgTime<15])
 
 #Length of argument written
@@ -132,28 +133,48 @@ table(ASM$ArgCond)
 ####### ---------------------------------
 #######  Create composite measures
 ####### ---------------------------------
-alpha(ASM[,c("SVAttr","SVFav","SVShowoff","BSVWant","BSVExcite")])
-ASM$sv <- rowMeans(ASM[,c("SVAttr","SVFav","SVShowoff","BSVWant","BSVExcite")], na.rm=TRUE)
+alpha(ASM[,c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")])
+ASM$sv5 <- rowMeans(
+  data.frame(
+    scale(ASM$SVAttr),
+    scale(ASM$SVFav),
+    scale(ASM$SVShowoff),
+    scale(ASM$SVWant),
+    scale(ASM$SVExcite)
+    ),
+  na.rm=TRUE)
 
-alpha(ASM[,c("BResSat","BResFair")])
-ASM$ResReact <- rowMeans(ASM[,c("BResSat","BResFair")])
+alpha(ASM[,c("ResSat","ResFair")])
+ASM$ResReact <- rowMeans(
+  data.frame(
+    scale(ASM$ResSat),
+    scale(ASM$ResFair)
+    ),
+  na.rm=TRUE)
+
+####### ---------------------------------
+#######  Hypothesis Tests
+####### ---------------------------------
 
 #Does subjective value of the car vary by condition? No
-summary(aov(sv ~ ArgCond, data=ASM))
-qplot(ArgCond,sv,data=ASM,geom="boxplot")
+summary(aov(sv5 ~ ArgCond, data=ASM))
+qplot(ArgCond,sv5,data=ASM,geom="boxplot")
+
+bargraph.CI(ArgCond,sv5, data=ASM, legend=T)
+sv5.lm <- (lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM))
 
 #Does reservation price vary by condition? No      
-summary(aov(BRP ~ ArgCond, data=ASM))
-qplot(ArgCond,BRP,data=ASM,geom="boxplot")
+summary(aov(RP ~ ArgCond, data=ASM))
+qplot(ArgCond,RP,data=ASM,geom="boxplot")
 
 #Does reaction to the offer vary by condition? No
 summary(aov(ResReact ~ ArgCond, data=ASM))
 qplot(ArgCond,ResReact,data=ASM,geom="boxplot")
 
 #Does the decision to accept the offer vay by condition?
-ASM$BResAccept <- factor(ASM$BResAccept,labels=c("Accept","Reject"))
-table(ASM$ArgCond, ASM$BResAccept)
-summary(glm(as.integer(BResAccept)-1 ~ ArgCond, data=ASM))
-chisq.test(ASM$ArgCond, ASM$BResAccept)
+
+table(ASM$ArgCond, ASM$ResAccept)
+summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=ASM))
+chisq.test(ASM$ArgCond, ASM$ResAccept)
         
         
