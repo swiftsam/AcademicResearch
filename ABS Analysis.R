@@ -8,7 +8,7 @@ library(psych)
 ####### ---------------------------------
 
 #load data
-ABS <- read.csv("ABS.csv", stringsAsFactors=F, na.strings=c(""))
+ABS <- read.csv("http://swift.cbdr.cmu.edu/data/ABS-data-2012-02-21.csv", stringsAsFactors=F, na.strings=c(""))
 
 #remove uncessary columns
 ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
@@ -164,7 +164,7 @@ ABS <- subset(ABS,xor(ABS$ArgCond=="NoArg", ABS$ArgChars>10))
 table(ABS$ArgCond, ABS$RoleCond)
 
 #write potential lottery winners to file
-write.csv(ABS[!is.na(ABS$Email),c("Email","src")],"ABS-lottery.csv")
+#write.csv(ABS[!is.na(ABS$Email),c("Email","src")],"ABS-lottery.csv")
 
 ####### ---------------------------------
 #######  Create composite measures
@@ -210,37 +210,39 @@ ABS$ResReact <- rowMeans(
 
 #Does subjective value of the car vary by condition?
 summary(aov(sv3 ~ ArgCond*RoleCond, data=ABS))
-bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS, legend=T)
+bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS, legend=T, ylab="Subjective Value of Car", xlab="Condition")
 sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS))
-
-
 
 #Qualtrics survey flow error resulted in most DV measures being shown only to Sellers
 #See if you can spot the error: http://i.imgur.com/nqtkc.png
 #Salvage data by analyzing only sellers
 sellers <- ABS[ABS$RoleCond=="Seller",]
 
-#Does the decision to accept the offer vary by condition?
+#Does the decision to accept the offer vary by Argument condition among Sellers?
 table(sellers$ArgCond, sellers$ResAccept)
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=sellers))
 chisq.test(sellers$ArgCond, sellers$ResAccept)
 
-#Does subjective value of the car vary by condition?
+#Does subjective value of the car vary by Argument condition among Sellers?
 summary(aov(sv5 ~ ArgCond, data=sellers))
 bargraph.CI(ArgCond,sv5,data=sellers)
 sv5.lm <- (lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ABS))
 
-#Does reaction to the offer vary by condition?
+#Does reaction to the offer vary by Argument condition among Sellers?
 summary(aov(ResReact ~ ArgCond, data=sellers))
 bargraph.CI(ArgCond,ResReact,data=sellers)
 
-#Does RP vary by condition?
+#Does RP vary by Argument condition among Sellers?
 summary(aov(RP ~ ArgCond, data=sellers))
-bargraph.CI(ArgCond,RP,data=sellers)
+bargraph.CI(ArgCond,RP,data=sellers, ylim=c(2000,2500))
 
-#Does Satisfaction with participants' own actual car vary by condition?
+#Does Satisfaction with participants' own actual car vary by condition among Sellers?
 table(ABS$DemOwnCar)
 carowners <- subset(ABS,ABS$DemOwnCar=="OwnsCar")
 summary(aov(DemCarSat ~ ArgCond*RoleCond, data=carowners))
 bargraph.CI(RoleCond, DemCarSat, group=ArgCond, data=carowners, legend=T, y.leg=7, x.leg=1, ylim=c(1,7))
 describe.by(ABS$DemCarSat, ABS$RoleCond)
+
+#Does subjective value of the car predict decision to accept among Sellers?
+summary(glm(as.integer(ResAccept)-1 ~ sv5, data=sellers))
+
