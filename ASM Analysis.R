@@ -8,7 +8,7 @@ library(psych)
 ####### ---------------------------------
 
 #load data
-ASM <- read.csv("ASM.csv", stringsAsFactors=F, na.strings=c(""))
+ASM <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-data-2012-02-21.csv", stringsAsFactors=F, na.strings=c(""))
 
 #remove uncessary columns
 ASM <- ASM[,!names(ASM) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
@@ -162,6 +162,7 @@ qplot(ArgCond,sv5,data=ASM,geom="boxplot")
 
 bargraph.CI(ArgCond,sv5, data=ASM, legend=T)
 sv5.lm <- (lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM))
+summary(sv5.lm)
 
 #Does reservation price vary by condition? No      
 summary(aov(RP ~ ArgCond, data=ASM))
@@ -170,6 +171,9 @@ qplot(ArgCond,RP,data=ASM,geom="boxplot")
 #Does reaction to the offer vary by condition? No
 summary(aov(ResReact ~ ArgCond, data=ASM))
 qplot(ArgCond,ResReact,data=ASM,geom="boxplot")
+react.lm <- (lm(ResReact ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM))
+summary(react.lm)
+
 
 #Does the decision to accept the offer vay by condition?
 

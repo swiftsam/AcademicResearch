@@ -210,8 +210,9 @@ ABS$ResReact <- rowMeans(
 
 #Does subjective value of the car vary by condition?
 summary(aov(sv3 ~ ArgCond*RoleCond, data=ABS))
-bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS, legend=T, ylab="Subjective Value of Car", xlab="Condition")
+bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS, legend=T, ylab="Subjective Valuation of Car (Z-score)",main="Role x Condition on SV of Car")
 sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS))
+summary(sv3.lm)
 
 #Qualtrics survey flow error resulted in most DV measures being shown only to Sellers
 #See if you can spot the error: http://i.imgur.com/nqtkc.png
@@ -227,6 +228,7 @@ chisq.test(sellers$ArgCond, sellers$ResAccept)
 summary(aov(sv5 ~ ArgCond, data=sellers))
 bargraph.CI(ArgCond,sv5,data=sellers)
 sv5.lm <- (lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ABS))
+summary(sv5.lm)
 
 #Does reaction to the offer vary by Argument condition among Sellers?
 summary(aov(ResReact ~ ArgCond, data=sellers))
