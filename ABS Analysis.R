@@ -181,7 +181,7 @@ ABS <- subset(ABS,xor(ABS$ArgCond=="NoArg", ABS$ArgChars>10))
 table(ABS$ArgCond, ABS$RoleCond)
 
 #write potential lottery winners to file
-write.csv(ABS[!is.na(ABS$Email),c("Email","src")],"ABS-lottery.csv")
+#write.csv(ABS[!is.na(ABS$Email),c("Email","src")],"ABS-lottery.csv")
 
 ####### ---------------------------------
 #######  Create composite measures
@@ -236,28 +236,32 @@ summary(sv3.lm)
 #Salvage data by analyzing only sellers
 sellers <- ABS[ABS$RoleCond=="Seller",]
 
-#Does the decision to accept the offer vary by condition?
+#Does the decision to accept the offer vary by Argument condition among Sellers?
 table(sellers$ArgCond, sellers$ResAccept)
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=sellers))
 chisq.test(sellers$ArgCond, sellers$ResAccept)
 
-#Does subjective value of the car vary by condition?
+#Does subjective value of the car vary by Argument condition among Sellers?
 summary(aov(sv5 ~ ArgCond, data=sellers))
 bargraph.CI(ArgCond,sv5,data=sellers)
 sv5.lm <- (lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ABS))
 summary(sv5.lm)
 
-#Does reaction to the offer vary by condition?
+#Does reaction to the offer vary by Argument condition among Sellers?
 summary(aov(ResReact ~ ArgCond, data=sellers))
 bargraph.CI(ArgCond,ResReact,data=sellers)
 
-#Does RP vary by condition?
+#Does RP vary by Argument condition among Sellers?
 summary(aov(RP ~ ArgCond, data=sellers))
-bargraph.CI(ArgCond,RP,data=sellers)
+bargraph.CI(ArgCond,RP,data=sellers, ylim=c(2000,2500))
 
-#Does Satisfaction with participants' own actual car vary by condition?
+#Does Satisfaction with participants' own actual car vary by condition among Sellers?
 table(ABS$DemOwnCar)
 carowners <- subset(ABS,ABS$DemOwnCar=="OwnsCar")
 summary(aov(DemCarSat ~ ArgCond*RoleCond, data=carowners))
 bargraph.CI(RoleCond, DemCarSat, group=ArgCond, data=carowners, legend=T, y.leg=7, x.leg=1, ylim=c(1,7))
 describe.by(ABS$DemCarSat, ABS$RoleCond)
+
+#Does subjective value of the car predict decision to accept among Sellers?
+summary(glm(as.integer(ResAccept)-1 ~ sv5, data=sellers))
+
