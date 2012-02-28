@@ -125,7 +125,7 @@ ABS2$Emaildup <- duplicated(ABS2$Email,incomparables= c(NA))
 
 ABS2$Starttime <- as.POSIXct(ABS2$Starttime)
 ABS2$Endtime   <- as.POSIXct(ABS2$Endtime)
-ABS2$TotalTime <- -as.double(ABS2$Starttime - ABS2$Endtime)*60 #number of seconds between start- and end- time
+ABS2$TotalTime <- -as.double(ABS2$Starttime - ABS2$Endtime) #number of seconds between start- and end- time
 
 ABS2$OtherTime <- ABS2$TotalTime - ABS2$ArgTime #number of seconds doing everything other than the arg
 
@@ -142,7 +142,7 @@ length(ABS2$ID[ABS2$IPdup])
 
 #total study completion time
 describe.by(ABS2$TotalTime,group=ABS2$ArgCond)
-#qplot(ABS2$TotalTime, geom="histogram", group=ABS2$ArgCond, fill=ABS2$ArgCond, xlim=c(0,30), binwidth=1, position="dodge")
+#qplot(ABS2$TotalTime, geom="histogram", group=ABS2$ArgCond, fill=ABS2$ArgCond, xlim=c(0,300), binwidth=1, position="dodge")
 length(ABS2$ID[ABS2$TotalTime<60]) 
 ABS2 <- subset(ABS2,ABS2$TotalTime>60)
 
@@ -215,26 +215,27 @@ ABS2$ResReact <- rowMeans(
 summary(aov(sv3 ~ ArgCond*RoleCond, data=ABS2))
 bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS2, legend=T, ylab="Subjective Valuation of Car (Z-score)",main="Role x Condition on SV of Car")
 sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2))
+sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond, data=ABS2))
 summary(sv3.lm)
+
+#Does subjective value of the car vary by condition?
+summary(aov(sv5 ~ ArgCond*RoleCond, data=ABS2))
+bargraph.CI(ArgCond,sv5,group=RoleCond, data=ABS2)
+sv5.lm <- (lm(sv5 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2))
+summary(sv5.lm)
 
 #Does the decision to accept the offer vary by condition?
 table(ABS2$ArgCond, ABS2$ResAccept)
-summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=ABS2))
+summary(glm(as.integer(ResAccept)-1 ~ ArgCond*RoleCond, data=ABS2))
 chisq.test(ABS2$ArgCond, ABS2$ResAccept)
-
-#Does subjective value of the car vary by condition?
-summary(aov(sv5 ~ ArgCond, data=ABS2))
-bargraph.CI(ArgCond,sv5,data=ABS2)
-sv5.lm <- (lm(sv5 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2))
-summary(sv5.lm)
 
 #Does reaction to the offer vary by condition?
 summary(aov(ResReact ~ ArgCond, data=ABS2))
 bargraph.CI(ArgCond,ResReact,data=ABS2)
 
 #Does RP vary by condition?
-summary(aov(RP ~ ArgCond, data=ABS2))
-bargraph.CI(ArgCond,RP,data=ABS2)
+summary(aov(RP ~ ArgCond*RoleCond, data=ABS2))
+bargraph.CI(ArgCond,RP,group=RoleCond,data=ABS2, ylim=c(2000,2500), legend=T)
 
 #Does Satisfaction with participants' own actual car vary by condition?
 table(ABS2$DemOwnCar)
