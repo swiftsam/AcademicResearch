@@ -2,7 +2,6 @@ library(plyr)
 library(ggplot2)
 library(sciplot)
 library(psych)
-library(digest)
 
 ####### ---------------------------------
 #######  Data Prep
@@ -12,20 +11,11 @@ library(digest)
 ABS <- read.csv("http://swift.cbdr.cmu.edu/data/ABS-data-2012-02-21.csv", stringsAsFactors=F, na.strings=c(""))
 
 #hash senstive information if it has not been done already
-ABS$EmailHash <- lapply(ABS$Email,function(x){
-                                    if(!is.na(x)){
-                                      digest(x)
-                                    } else {
-                                      NA
-                                    }
-                                  })
-ABS$IPHash <- lapply(ABS$IP,function(x){
-                                    if(!is.na(x)){
-                                      digest(x)
-                                    } else {
-                                      NA
-                                    }
-                                  })
+source("Hash.R")
+ABS$EmailHash <- hashVect(ABS$Email)
+ABS$Email <- NULL
+ABS$IPHash <- hashVect(ABS$IP)
+ABS$IP <- NULL
 
 #remove uncessary columns
 ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
