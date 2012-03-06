@@ -213,19 +213,19 @@ ABS2$ResReact <- rowMeans(
 
 #Does subjective value of the car vary by condition?
 summary(aov(sv3 ~ ArgCond*RoleCond, data=ABS2))
-bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS2, legend=T, ylab="Subjective Valuation of Car (Z-score)",main="Role x Condition on SV of Car")
+bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS2, legend=T, ylab="Subjective Valuation of Car (3 item, Z-score)",main="Role x Condition on SV of Car")
 sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2))
 sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond, data=ABS2))
 summary(sv3.lm)
 
 #Does subjective value of the car vary by condition?
 summary(aov(sv5 ~ ArgCond*RoleCond, data=ABS2))
-bargraph.CI(ArgCond,sv5,group=RoleCond, data=ABS2)
+bargraph.CI(ArgCond,sv5,group=RoleCond, data=ABS2, legend=T, ylab="Subjective Valuation of Car (5 item, Z-score)",main="ABS2: Role x Condition on SV(5) of Car")
 sv5.lm <- (lm(sv5 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2))
 summary(sv5.lm)
 
 #Does the decision to accept the offer vary by condition?
-table(ABS2$ArgCond, ABS2$ResAccept)
+table(ABS2$ArgCond, ABS2$ResAccept, ABS2$RoleCond)
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond*RoleCond, data=ABS2))
 chisq.test(ABS2$ArgCond, ABS2$ResAccept)
 
@@ -235,7 +235,9 @@ bargraph.CI(ArgCond,ResReact,data=ABS2)
 
 #Does RP vary by condition?
 summary(aov(RP ~ ArgCond*RoleCond, data=ABS2))
-bargraph.CI(ArgCond,RP,group=RoleCond,data=ABS2, ylim=c(2000,2500), legend=T)
+rp.lm <- lm(RP ~ ArgCond*RoleCond, data=ABS2)
+summary(rp.lm)
+bargraph.CI(ArgCond,RP,group=RoleCond,data=ABS2, ylim=c(2000,2500), legend=T, ylab="Reservation Price", main="ABS2: Role x Condition on Reservation Price")
 
 #Does Satisfaction with participants' own actual car vary by condition?
 table(ABS2$DemOwnCar)
