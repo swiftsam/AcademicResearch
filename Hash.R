@@ -8,4 +8,5 @@ hashVect <- function(vector) {
       NA
     }
   })
+  unlist(vector)
 }
