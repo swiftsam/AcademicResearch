@@ -8,7 +8,7 @@ library(psych)
 ####### ---------------------------------
 
 #load data
-ABS2 <- read.csv("ABS2.csv", stringsAsFactors=F)
+ABS2 <- read.csv("http://swift.cbdr.cmu.edu/data/ABS2-data-2012-02-24.csv", stringsAsFactors=F)
 
 #set empty strings to NA
 ABS2[ABS2==""] <- NA
