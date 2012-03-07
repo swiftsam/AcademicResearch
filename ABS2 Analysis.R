@@ -2,18 +2,16 @@ library(plyr)
 library(ggplot2)
 library(sciplot)
 library(psych)
-library(digest)
 
 ####### ---------------------------------
 #######  Data Prep
 ####### ---------------------------------
 
 #load data
-ABS2 <- read.csv("ABS2.csv", stringsAsFactors=F, na.strings=c(""))
+ABS2 <- read.csv("ABS2.csv", stringsAsFactors=F)
 
-#hash senstive information if it has not been done already
-#ABS2$EmailHash <- digest(ABS2$Email)
-
+#set empty strings to NA
+ABS2[ABS2==""] <- NA
 
 #remove uncessary columns
 ABS2 <- ABS2[,!names(ABS2) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
