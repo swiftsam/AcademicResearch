@@ -10,6 +10,9 @@ library(psych)
 #load data
 ABS <- read.csv("http://swift.cbdr.cmu.edu/data/ABS-data-2012-01-25.csv", stringsAsFactors=F)
 
+#set empty strings to NA
+ABS[ABS==""] <- NA
+
 #remove uncessary columns
 ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
                                "Consent1","Consent2","Consent3","Consent4",
@@ -23,17 +26,11 @@ ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
 #rename unnamed columns
 ABS <- rename(ABS, c("V6"="IP","V8"="Starttime","V9"="Endtime","Q58"="SSVWant","Q59"="SSVExcite"))
 
-#set empty strings to NA
-####
-####  TODO 
-####
-
-
 #add simple IDs for each record
 ABS$ID <- factor(c(1:nrow(ABS)))
 
 #Set conditions and factors
-ABS$RoleCond[ABS$RoleCond==""] <- ABS$RoieCond[ABS$RoleCond==""] #correcting typo in qualtrics
+ABS$RoleCond[is.na(ABS$RoleCond)] <- ABS$RoieCond[is.na(ABS$RoleCond)] #correcting typo in qualtrics
 ABS$RoieCond <- NULL
 ABS$RoleCond <- factor(ABS$RoleCond)
 ABS$ArgCond <- rep(NA, nrow(ABS))
