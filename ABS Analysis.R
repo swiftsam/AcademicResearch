@@ -8,14 +8,7 @@ library(psych)
 ####### ---------------------------------
 
 #load data
-ABS <- read.csv("http://swift.cbdr.cmu.edu/data/ABS-data-2012-02-21.csv", stringsAsFactors=F, na.strings=c(""))
-
-#hash senstive information if it has not been done already
-source("Hash.R")
-ABS$EmailHash <- hashVect(ABS$Email)
-ABS$Email <- NULL
-ABS$IPHash <- hashVect(ABS$IP)
-ABS$IP <- NULL
+ABS <- read.csv("http://swift.cbdr.cmu.edu/data/ABS-data-2012-01-25.csv", stringsAsFactors=F)
 
 #remove uncessary columns
 ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
@@ -30,11 +23,17 @@ ABS <- ABS[,!names(ABS) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
 #rename unnamed columns
 ABS <- rename(ABS, c("V6"="IP","V8"="Starttime","V9"="Endtime","Q58"="SSVWant","Q59"="SSVExcite"))
 
+#set empty strings to NA
+####
+####  TODO 
+####
+
+
 #add simple IDs for each record
 ABS$ID <- factor(c(1:nrow(ABS)))
 
 #Set conditions and factors
-ABS$RoleCond[is.na(ABS$RoleCond)] <- ABS$RoieCond[is.na(ABS$RoleCond)] #correcting typo in qualtrics
+ABS$RoleCond[ABS$RoleCond==""] <- ABS$RoieCond[ABS$RoleCond==""] #correcting typo in qualtrics
 ABS$RoieCond <- NULL
 ABS$RoleCond <- factor(ABS$RoleCond)
 ABS$ArgCond <- rep(NA, nrow(ABS))
@@ -47,7 +46,7 @@ ABS$src <-factor(ABS$src)
 table(ABS$ArgCond, ABS$RoleCond)
 
 # remove participants who dropped out before being assigned to conditions
-ABS <- ABS[!is.na(ABS$RoleCond) & !is.na(ABS$ArgCond),]
+ABS <- subset(ABS,!is.na(ABS$ArgCond) & !is.na(ABS$RoleCond))
 
 #Consolidate data from condition-specific columns into single columns
 ABS$ScenTime <- rep(NA,nrow(ABS))
