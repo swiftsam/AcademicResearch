@@ -146,7 +146,26 @@ t.test(PercEdRev ~ ArgCond, data=lve)
 #Does the liklihood of requesting the book vary by condition?
 table(lve$ArgCond, lve$bookReq)
 chisq.test(lve$ArgCond, lve$bookReq)
-summary(glm(bookReq ~ ArgCond + sv6 + BCread, data=lve))
+summary(glm(bookReq ~ ArgCond + sv6 + BCread , data=lve))
+
+
+####### ---------------------------------
+#######  Failures of Randomization?
+####### ---------------------------------
+
+#Did the samples differ in how long they looked at the book info?
+t.test(TimeDesc_3 ~ ArgCond, data=lve)
+qplot(ArgCond,TimeDesc_3,data=lve, geom="boxplot")
+
+#Did the samples differ in how many clicks on the book info?
+describe.by(lve$TimeDesc_4, lve$ArgCond)
+t.test(log(TimeDesc_4) ~ ArgCond, data=lve)
+qplot(ArgCond,TimeDesc_4,data=lve, geom="boxplot")
+
+#Did the samples differ int terms of time spent reading materials?
+describe.by(lve$TimeScen, lve$ArgCond)
+t.test(logTimeScen)~ ArgCond, data=lve)
+qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
 
 
 
