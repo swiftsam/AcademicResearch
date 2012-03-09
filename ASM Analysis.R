@@ -8,7 +8,10 @@ library(psych)
 ####### ---------------------------------
 
 #load data
-ASM <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-data-2012-02-21.csv", stringsAsFactors=F, na.strings=c(""))
+ASM <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-data-2012-02-07.csv", stringsAsFactors=F)
+
+#set empty strings to NA
+ASM[ASM==""] <- NA
 
 #remove uncessary columns
 ASM <- ASM[,!names(ASM) %in% c("X.V1","V2","V3","V4","V5","V7","V10",
@@ -166,7 +169,7 @@ summary(sv5.lm)
 
 #Does reservation price vary by condition? No      
 summary(aov(RP ~ ArgCond, data=ASM))
-qplot(ArgCond,RP,data=ASM,geom="boxplot")
+qplot(ArgCond,RP,data=ASM,geom=c("boxplot","jitter"))
 
 #Does reaction to the offer vary by condition? No
 summary(aov(ResReact ~ ArgCond, data=ASM))
