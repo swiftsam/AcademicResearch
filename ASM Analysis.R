@@ -177,11 +177,31 @@ qplot(ArgCond,ResReact,data=ASM,geom="boxplot")
 react.lm <- (lm(ResReact ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM))
 summary(react.lm)
 
-
 #Does the decision to accept the offer vay by condition?
-
 table(ASM$ArgCond, ASM$ResAccept)
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=ASM))
 chisq.test(ASM$ArgCond, ASM$ResAccept)
-        
+
+### Issue Weights
+
+alpha(ASM[,c("IssWYr","IssWMi","IssWCon","IssWMod","IssWMat","IssWExt", "IssWSafe","IssWFuel")])
+ASM$IssW8 <- rowMeans(
+  data.frame(
+    scale(ASM$IssWYr),
+    scale(ASM$IssWMi),
+    scale(ASM$IssWCon),
+    scale(ASM$IssWMod),
+    scale(ASM$IssWMat),
+    scale(ASM$IssWExt),
+    scale(ASM$IssWSafe),
+    scale(ASM$IssWFuel)
+    ),
+  na.rm=TRUE)
+
+
+summary(aov(IssWCon ~ ArgCond, data=ASM))
+qplot(ArgCond,IssWCon,data=ASM,geom="boxplot")
+
+
+
         
