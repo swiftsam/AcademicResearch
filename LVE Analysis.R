@@ -146,7 +146,7 @@ t.test(PercEdRev ~ ArgCond, data=lve)
 #Does the liklihood of requesting the book vary by condition?
 table(lve$ArgCond, lve$bookReq)
 chisq.test(lve$ArgCond, lve$bookReq)
-summary(glm(bookReq ~ ArgCond + sv6 + BCread , data=lve))
+summary(glm(bookReq ~ ArgCond + sv6, data=lve))
 
 
 ####### ---------------------------------
@@ -167,5 +167,30 @@ describe.by(lve$TimeScen, lve$ArgCond)
 t.test(logTimeScen)~ ArgCond, data=lve)
 qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
 
+####### ---------------------------------
+#######  Differences among those who returned for the book?
+####### ---------------------------------
 
+requesters <- subset(lve, bookReq==1)
 
+#Does subjective value of the book vary by condition?
+t.test(sv6 ~ ArgCond, data=requesters)
+bargraph.CI(ArgCond,sv6,data=requesters)
+qplot(ArgCond,sv6,data=requesters,geom="boxplot",ylab="Subjective Value of Book (6 item, Z score)")
+
+#Did perception of the user review vary by condition?
+t.test(PercStars_1 ~ ArgCond, data=requesters)
+bargraph.CI(ArgCond,PercStars_1, data=requesters, ylim=c(1,5))
+qplot(ArgCond,PercStars_1,data=requesters,geom=c("boxplot","jitter"),ylim=c(1,5),ylab="Perception of mean user review")
+
+#Did perception of the editorial review vary by condition?
+t.test(PercEdRev ~ ArgCond, data=requesters)
+
+#Did the samples differ in how long they looked at the book info?
+t.test(TimeDesc_3 ~ ArgCond, data=requesters)
+qplot(ArgCond,TimeDesc_3,data=requesters, geom="boxplot")
+
+#Did the samples differ in how many clicks on the book info?
+describe.by(requesters$TimeDesc_4, requesters$ArgCond)
+t.test(log(TimeDesc_4) ~ ArgCond, data=requesters)
+qplot(ArgCond,TimeDesc_4,data=requesters, geom="boxplot")
