@@ -132,17 +132,18 @@ ABS2$ResReact <- rowMeans(
 #######  Hypothesis Tests
 ####### ---------------------------------
 
-#Does subjective value of the car vary by condition?
+#Does subjective value of the car vary by condition (3-item scale for comparison to ABS)?
 summary(aov(sv3 ~ ArgCond*RoleCond, data=ABS2))
 bargraph.CI(ArgCond,sv3,group=RoleCond,data=ABS2, legend=T, ylab="Subjective Valuation of Car (3 item, Z-score)",main="Role x Condition on SV of Car")
 sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2))
 sv3.lm <- (lm(sv3 ~ ArgCond*RoleCond, data=ABS2))
 summary(sv3.lm)
 
-#Does subjective value of the car vary by condition?
+#Does subjective value of the car vary by condition (5-item scale)?
 summary(aov(sv5 ~ ArgCond*RoleCond, data=ABS2))
 bargraph.CI(ArgCond,sv5,group=RoleCond, data=ABS2, legend=T, ylab="Subjective Valuation of Car (5 item, Z-score)",main="ABS2: Role x Condition on SV(5) of Car")
 sv5.lm <- (lm(sv5 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2))
+sv5.lm <- (lm(sv5 ~ ArgCond*RoleCond, data=ABS2))
 summary(sv5.lm)
 
 #Does the decision to accept the offer vary by condition?
