@@ -159,22 +159,24 @@ ASM$ResReact <- rowMeans(
 #######  Hypothesis Tests
 ####### ---------------------------------
 
-#Does subjective value of the car vary by condition? No
+#Does subjective value of the car vary by condition?
 summary(aov(sv5 ~ ArgCond, data=ASM))
 qplot(ArgCond,sv5,data=ASM,geom="boxplot")
 
 bargraph.CI(ArgCond,sv5, data=ASM, legend=T)
-sv5.lm <- (lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM))
+sv5.lm <- lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)
 summary(sv5.lm)
 
-#Does reservation price vary by condition? No      
+#Does reservation price vary by condition? No
 summary(aov(RP ~ ArgCond, data=ASM))
 qplot(ArgCond,RP,data=ASM,geom=c("boxplot","jitter"))
+rp.lm <-lm(RP ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)
+summary(rp.lm)
 
 #Does reaction to the offer vary by condition? No
 summary(aov(ResReact ~ ArgCond, data=ASM))
 qplot(ArgCond,ResReact,data=ASM,geom="boxplot")
-react.lm <- (lm(ResReact ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM))
+react.lm <- lm(ResReact ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)
 summary(react.lm)
 
 #Does the decision to accept the offer vay by condition?
