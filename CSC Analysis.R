@@ -1,6 +1,9 @@
 #load data
 csc <- read.csv("http://swift.cbdr.cmu.edu/data/CSC-data-2011-12-01.csv", stringsAsFactors=FALSE)
 
+#set empty strings to NA
+csc[csc==""] <- NA
+
 #rename variables and delete uneeded columns
 source("CSC Data Prep.R")
 
@@ -11,8 +14,8 @@ csc$ArgTarget <- factor(csc$ArgTarget)
 csc$ArgType <- factor(csc$ArgType)
 
 #calculate total time spent completing experiment
-csc$StartDate <- as.POSIXct(csc$StartDate)
-csc$EndDate   <- as.POSIXct(csc$EndDate)
+csc$StartDate <- as.POSIXct(csc$StartDate, format="%m/%d/%Y %H:%M")
+csc$EndDate   <- as.POSIXct(csc$EndDate, format="%m/%d/%Y %H:%M")
 csc$TotalTime <- csc$EndDate - csc$StartDate
 
 #calculate character counts of arguments
