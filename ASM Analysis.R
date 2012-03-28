@@ -156,7 +156,7 @@ ASM$ResReact <- rowMeans(
   na.rm=TRUE)
 
 ####### ---------------------------------
-#######  Hypothesis Tests
+#######  Effects of Condition on Outcomes
 ####### ---------------------------------
 
 #Does subjective value of the car vary by condition?
@@ -167,13 +167,13 @@ bargraph.CI(ArgCond,sv5, data=ASM, legend=T)
 sv5.lm <- lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)
 summary(sv5.lm)
 
-#Does reservation price vary by condition? No
+#Does reservation price vary by condition?
 summary(aov(RP ~ ArgCond, data=ASM))
 qplot(ArgCond,RP,data=ASM,geom=c("boxplot","jitter"))
 rp.lm <-lm(RP ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)
 summary(rp.lm)
 
-#Does reaction to the offer vary by condition? No
+#Does reaction to the offer vary by condition?
 summary(aov(ResReact ~ ArgCond, data=ASM))
 qplot(ArgCond,ResReact,data=ASM,geom="boxplot")
 react.lm <- lm(ResReact ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)
@@ -184,25 +184,24 @@ table(ASM$ArgCond, ASM$ResAccept)
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond, data=ASM))
 chisq.test(ASM$ArgCond, ASM$ResAccept)
 
-### Issue Weights
+####### ---------------------------------
+#######  Process Hypotheses
+####### ---------------------------------
 
-alpha(ASM[,c("IssWYr","IssWMi","IssWCon","IssWMod","IssWMat","IssWExt", "IssWSafe","IssWFuel")])
-ASM$IssW8 <- rowMeans(
-  data.frame(
-    scale(ASM$IssWYr),
-    scale(ASM$IssWMi),
-    scale(ASM$IssWCon),
-    scale(ASM$IssWMod),
-    scale(ASM$IssWMat),
-    scale(ASM$IssWExt),
-    scale(ASM$IssWSafe),
-    scale(ASM$IssWFuel)
-    ),
-  na.rm=TRUE)
+#subset of data in which arguments were made
+ASM.argCond <- subset(ASM, ArgCond == "Arg")
+
+#load and merge coded data on argument use
+argUse <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-coded-argUse-2012-03-28.csv", stringsAsFactors=F)
+ASM.argCond <- merge(ASM.argCond, argUse, by="ID")
+
+#load and merge coded data on case info recall (salience)
+
+#Reshape the relevant columns for fixed effect analysis
 
 
-summary(aov(IssWCon ~ ArgCond, data=ASM))
-qplot(ArgCond,IssWCon,data=ASM,geom="boxplot")
+#Does the use of an argument affect the weight placed on the corresponding issue?
+
 
 
 
