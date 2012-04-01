@@ -28,6 +28,13 @@ lve$ID <- factor(c(1:nrow(lve)))
 #Set conditions and factors
 lve$ArgCond <- factor(lve$ArgCond)
 lve$src <-factor(lve$src)
+lve$BCread <- factor(lve$BCread, labels=c("Read","PartRead","NotRead"))
+lve$BCown <- factor(lve$BCown, labels=c("No","Yes-Digital","Yes-Paper"))
+lve$OwnOrReadBook <- rep(0,nrow(lve)) #combine own and read into a single binary measure of previous exposure
+lve$OwnOrReadBook[lve$BCread=="Read" | lve$BCread=="PartRead" | lve$BCown=="Yes-Digital" | lve$BCown=="Yes-Paper"] <- 1
+lve$OwnOrReadBook <- factor(lve$OwnOrReadBook, labels=c("No","Yes"))
+
+lve$DemGen <- factor(lve$DemGen, labels=c("Male","Female"))
 
 #Check allocation to conditions
 table(lve$ArgCond)
@@ -82,6 +89,10 @@ describe(lve$ArgChars[lve$ArgCond=="Arg"])
 qplot(lve$ArgChars[lve$ArgCond=="Arg"], geom="histogram", binwidth=20)
 length(lve$ID[lve$ArgCond=="Arg" & lve$ArgChars<50])
 lve <- subset(lve,xor(lve$ArgCond=="NoArg", lve$ArgChars>50))
+
+#Already Own or have read the book
+length(lve$ID[lve$OwnOrReadBook=="Yes"])
+lve <- subset(lve, lve$OwnOrReadBook=="No")
 
 #Check allocation to conditions
 table(lve$ArgCond)
@@ -156,7 +167,7 @@ t.test(PercEdRev ~ ArgCond, data=lve)
 table(lve$ArgCond, lve$bookReq)
 chisq.test(lve$ArgCond, lve$bookReq)
 summary(glm(bookReq ~ ArgCond + sv6, data=lve))
-
+summary(glm(bookReq ~ ArgCond + sv6 + log(TimeScen) + log(TotalTime), data=lve))
 
 ####### ---------------------------------
 #######  Failures of Randomization?
