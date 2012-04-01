@@ -56,28 +56,6 @@ ASM$ArgTime[is.na(ASM$ArgTime)] <- ASM$BNoArgExpT_3[is.na(ASM$ArgTime)]
 ASM <- ASM[,!names(ASM) %in% c("BArgTime_3","BNoArgTime_3","BNoArgExpT_3")]
 
 ####### ---------------------------------
-#######  Sample Characteristics
-####### ---------------------------------
-ASM$DemGeo <- factor(ASM$DemGeo)
-str(ASM$DemGeo)
-ASM$DemGen <- factor(ASM$DemGen, labels=c("Male","Female"))
-table(ASM$DemGen)
-ASM$DemYOB <- ASM$DemYOB+1919  #values start at 1920=1
-ASM$DemAge <- 2012 - ASM$DemYOB
-describe(ASM$DemAge)
-table(ASM$src)
-ASM$DemLang <- factor(tolower(ASM$DemLang))
-length(ASM$DemLang)
-table(ASM$DemLang)
-
-ASM$DemOwnCar <- factor(ASM$DemOwnCar, labels=c("OwnsCar","DoesNotOwnCar"))
-ASM$DemCarPurc <- factor(ASM$DemCarPurc, labels=c("HavePurchased","HaveNotPurchased"))
-carbuyers <- subset(ASM, ASM$DemCarPurc=="HavePurchased")
-colSums(carbuyers[c("DemCarPTyp_1","DemCarPTyp_2","DemCarPTyp_3","DemCarPTyp_4")],na.rm=T)
-
-ASM$DemAffect <- factor(ASM$DemAffect, label=c("Like More","No Change","Like Less"))
-
-####### ---------------------------------
 #######  Calculated Variables
 ####### ---------------------------------
 ASM$ArgChars <- nchar(ASM$Arg)  #character count of arguments written
@@ -132,6 +110,27 @@ table(ASM$ArgCond)
 #write potential lottery winners to file
 #write.csv(ASM[!is.na(ASM$Email),c("Email","src")],"ASM-lottery.csv")
 
+####### ---------------------------------
+#######  Sample Characteristics
+####### ---------------------------------
+ASM$DemGeo <- factor(ASM$DemGeo)
+str(ASM$DemGeo)
+ASM$DemGen <- factor(ASM$DemGen, labels=c("Male","Female"))
+table(ASM$DemGen)
+ASM$DemYOB <- ASM$DemYOB+1919  #values start at 1920=1
+ASM$DemAge <- 2012 - ASM$DemYOB
+describe(ASM$DemAge)
+table(ASM$src)
+ASM$DemLang <- factor(tolower(ASM$DemLang))
+length(ASM$DemLang)
+table(ASM$DemLang)
+
+ASM$DemOwnCar <- factor(ASM$DemOwnCar, labels=c("OwnsCar","DoesNotOwnCar"))
+ASM$DemCarPurc <- factor(ASM$DemCarPurc, labels=c("HavePurchased","HaveNotPurchased"))
+carbuyers <- subset(ASM, ASM$DemCarPurc=="HavePurchased")
+colSums(carbuyers[c("DemCarPTyp_1","DemCarPTyp_2","DemCarPTyp_3","DemCarPTyp_4")],na.rm=T)
+
+ASM$DemAffect <- factor(ASM$DemAffect, label=c("Like More","No Change","Like Less"))
 
 ####### ---------------------------------
 #######  Create composite measures

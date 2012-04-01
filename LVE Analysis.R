@@ -36,21 +36,6 @@ table(lve$ArgCond)
 lve <- subset(lve, !is.na(ArgCond))
 
 ####### ---------------------------------
-#######  Sample Characteristics
-####### ---------------------------------
-lve$DemGeo <- factor(lve$DemGeo)
-str(lve$DemGeo)
-lve$DemGen <- factor(lve$DemGen, labels=c("Male","Female"))
-table(lve$DemGen)
-lve$DemYOB <- lve$DemYOB+1919  #values start at 1920=1
-lve$DemAge <- 2012 - lve$DemYOB
-describe(lve$DemAge)
-table(lve$src)
-lve$DemLang <- factor(tolower(lve$DemLang))
-length(lve$DemLang)
-table(lve$DemLang)
-
-####### ---------------------------------
 #######  Calculated Variables
 ####### ---------------------------------
 lve$ArgChars <- nchar(lve$Arg)  #character count of arguments written
@@ -101,6 +86,20 @@ lve <- subset(lve,xor(lve$ArgCond=="NoArg", lve$ArgChars>50))
 #Check allocation to conditions
 table(lve$ArgCond)
 
+####### ---------------------------------
+#######  Sample Characteristics
+####### ---------------------------------
+lve$DemGeo <- factor(lve$DemGeo)
+str(lve$DemGeo)
+lve$DemGen <- factor(lve$DemGen, labels=c("Male","Female"))
+table(lve$DemGen)
+lve$DemYOB <- lve$DemYOB+1919  #values start at 1920=1
+lve$DemAge <- 2012 - lve$DemYOB
+describe(lve$DemAge)
+table(lve$src)
+lve$DemLang <- factor(tolower(lve$DemLang))
+length(lve$DemLang)
+table(lve$DemLang)
 
 ####### ---------------------------------
 #######  Create composite measures

@@ -93,28 +93,6 @@ ABS <- ABS[,!names(ABS) %in% c("BScenTime_3","SScenTime_3",
                                "BResSat","SResSat","BResFair","SResFair","BResAccept","SResAccept")]
 
 ####### ---------------------------------
-#######  Sample Characteristics
-####### ---------------------------------
-ABS$DemGeo <- factor(ABS$DemGeo)
-str(ABS$DemGeo)
-ABS$DemGen <- factor(ABS$DemGen, labels=c("Male","Female"))
-table(ABS$DemGen)
-ABS$DemYOB <- ABS$DemYOB+1919  #values start at 1920=1
-ABS$DemAge <- 2012 - ABS$DemYOB
-describe(ABS$DemAge)
-table(ABS$src)
-ABS$DemLang <- factor(tolower(ABS$DemLang))
-length(ABS$DemLang)
-table(ABS$DemLang)
-
-ABS$DemOwnCar <- factor(ABS$DemOwnCar, labels=c("OwnsCar","DoesNotOwnCar"))
-ABS$DemCarPurc <- factor(ABS$DemCarPurc, labels=c("HavePurchased","HaveNotPurchased"))
-carbuyers <- subset(ABS, ABS$DemCarPurc=="HavePurchased")
-colSums(carbuyers[c("DemCarPTyp_1","DemCarPTyp_2","DemCarPTyp_3","DemCarPTyp_4")],na.rm=T)
-
-ABS$DemAffect <- factor(ABS$DemAffect, label=c("Like More","No Change","Like Less"))
-
-####### ---------------------------------
 #######  Calculated Variables
 ####### ---------------------------------
 ABS$ArgChars <- nchar(ABS$Arg)  #character count of arguments written
@@ -168,6 +146,28 @@ table(ABS$ArgCond, ABS$RoleCond)
 
 #write potential lottery winners to file
 #write.csv(ABS[!is.na(ABS$Email),c("Email","src")],"ABS-lottery.csv")
+
+####### ---------------------------------
+#######  Sample Characteristics
+####### ---------------------------------
+ABS$DemGeo <- factor(ABS$DemGeo)
+str(ABS$DemGeo)
+ABS$DemGen <- factor(ABS$DemGen, labels=c("Male","Female"))
+table(ABS$DemGen)
+ABS$DemYOB <- ABS$DemYOB+1919  #values start at 1920=1
+ABS$DemAge <- 2012 - ABS$DemYOB
+describe(ABS$DemAge)
+table(ABS$src)
+ABS$DemLang <- factor(tolower(ABS$DemLang))
+length(ABS$DemLang)
+table(ABS$DemLang)
+
+ABS$DemOwnCar <- factor(ABS$DemOwnCar, labels=c("OwnsCar","DoesNotOwnCar"))
+ABS$DemCarPurc <- factor(ABS$DemCarPurc, labels=c("HavePurchased","HaveNotPurchased"))
+carbuyers <- subset(ABS, ABS$DemCarPurc=="HavePurchased")
+colSums(carbuyers[c("DemCarPTyp_1","DemCarPTyp_2","DemCarPTyp_3","DemCarPTyp_4")],na.rm=T)
+
+ABS$DemAffect <- factor(ABS$DemAffect, label=c("Like More","No Change","Like Less"))
 
 ####### ---------------------------------
 #######  Create composite measures
