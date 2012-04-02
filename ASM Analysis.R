@@ -1,7 +1,9 @@
+library(reshape)
 library(plyr)
 library(ggplot2)
 library(sciplot)
 library(psych)
+library(lme4)
 
 ####### ---------------------------------
 #######  Data Prep
@@ -9,6 +11,8 @@ library(psych)
 
 #load data
 ASM <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-data-2012-02-07.csv", stringsAsFactors=F)
+argUseCoded <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-coded-ArgUse-2012-03-28.csv", stringsAsFactors=F)
+attrSalCoded <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-coded-AttrSal-2012-04-02.csv")
 
 #set empty strings to NA
 ASM[ASM==""] <- NA
@@ -32,6 +36,11 @@ ASM <- rename(ASM, c("V6"="IP","V8"="Starttime","V9"="Endtime",
 
 #add simple IDs for each record
 ASM$ID <- factor(c(1:nrow(ASM)))
+
+#merge raw and coded data on IDs
+ASM <- merge(ASM, argUseCoded, by=c("ID"),all.x=T)
+ASM <- merge(ASM, attrSalCoded, by=c("ID"),all.x=T)
+
 
 #Set conditions and factors
 ASM$ArgCond <- rep(NA, nrow(ASM))
@@ -91,6 +100,9 @@ ASM$Endtime   <- as.POSIXct(ASM$Endtime)
 ASM$TotalTime <- -as.double(ASM$Starttime - ASM$Endtime) #number of seconds between start- and end- time
 
 ASM$OtherTime <- ASM$TotalTime - ASM$ArgTime #number of seconds doing everything other than the arg
+
+#The total number of arguments used 
+ASM$ArgUseSum <- rowSums(ASM[c("ArgUseMi","ArgUseYr","ArgUseCon","ArgUseSafe","ArgUseParts","ArgUseFuel","ArgUseOther")])
 
 ####### ---------------------------------
 #######  Exclusion Criteria
@@ -188,14 +200,54 @@ chisq.test(ASM$ArgCond, ASM$ResAccept)
 #######  Process Hypotheses
 ####### ---------------------------------
 
-#subset of data in which arguments were made
-ASM.argCond <- subset(ASM, ArgCond == "Arg")
+#Does recall vary by argument condition?
+summary(glm(AttrSalYrCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Model Year
+summary(glm(AttrSalMiCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Mileage
+summary(lm(AttrSalModCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Make & Model
+summary(lm(AttrSalExtCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Extras
 
-#load and merge coded data on argument use
-argUse <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-coded-argUse-2012-03-28.csv", stringsAsFactors=F)
-ASM.argCond <- merge(ASM.argCond, argUse, by="ID")
+#Does recall of different attributes affect outcomes?
+summary(lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime) + AttrSalMiCoded + AttrSalYrCoded + AttrSalModCoded + AttrSalExtCoded, data=ASM))
+summary(lm(RP ~ ArgCond + log(OtherTime) + log(ArgTime) + AttrSalMiCoded + AttrSalYrCoded + AttrSalModCoded + AttrSalExtCoded, data=ASM))
+summary(glm(as.integer(ResAccept)-1 ~ ArgCond + log(OtherTime) + log(ArgTime) + AttrSalMiCoded + AttrSalYrCoded + AttrSalModCoded + AttrSalExtCoded, data=ASM))
 
-#load and merge coded data on case info recall (salience)
+#Subset the argument condition
+ASM.arg <- subset(ASM, ArgCond=="Arg")
+
+#Does the use of a specific argument increase the recall of the related fact?
+table(ASM.arg$ArgUseMi,ASM.arg$AttrSalMiCoded)
+chisq.test(ASM.arg$ArgUseMi,ASM.arg$AttrSalMiCoded)
+
+table(ASM.arg$ArgUseYr,ASM.arg$AttrSalYrCoded)
+chisq.test(ASM.arg$ArgUseYr,ASM.arg$AttrSalYrCoded)
+
+#Does the use of specific arguments increase the weight placed on that issue?
+ArgUse.long <- melt(ASM.arg[c("ID","ArgUseYr","ArgUseMi","ArgUseCon","ArgUseSafe","ArgUseFuel")],id="ID")
+IssW.long <- melt(ASM.arg[c("ID","IssWYr","IssWMi","IssWCon","IssWSafe","IssWFuel")],id="ID")
+
+UseWeight.long <- data.frame(ArgUse.long,IssW.long[3])
+names(UseWeight.long) <- c("ID","Topic","ArgUse","IssW")
+
+lmer(IssW ~ factor(ArgUse) + (1|ID), data=UseWeight.long)
+
+
+#Does the number of arguments made use predict outcomes?
+summary(lm(sv5 ~ ArgUseSum + log(OtherTime) + log(ArgTime), data=ASM))
+summary(lm(RP ~ ArgUseSum + log(OtherTime) + log(ArgTime), data=ASM))
+summary(glm(as.integer(ResAccept)-1 ~ ArgUseSum + log(OtherTime) + log(ArgTime), data=ASM))
+
+#Do the use of specific arguments predict outcomes?
+summary(lm(sv5 ~ ArgUseMi + ArgUseYr + ArgUseCon + ArgUseSafe + ArgUseParts + ArgUseFuel + ArgUseOther, data=ASM.arg))
+summary(lm(RP ~ ArgUseMi + ArgUseYr + ArgUseCon + ArgUseSafe + ArgUseParts + ArgUseFuel + ArgUseOther, data=ASM.arg))
+
+#Does the use 
+t.test(IssWYr ~ factor(ArgUseYr), data=ASM.arg)
+
+
+
+describe.by(ASM.arg$sv5, ASM.arg$ArgUseYr)
+
+
 
 #Reshape the relevant columns for fixed effect analysis
 
