@@ -28,27 +28,19 @@ lve$ID <- factor(c(1:nrow(lve)))
 #Set conditions and factors
 lve$ArgCond <- factor(lve$ArgCond)
 lve$src <-factor(lve$src)
+lve$BCread <- factor(lve$BCread, labels=c("Read","PartRead","NotRead"))
+lve$BCown <- factor(lve$BCown, labels=c("No","Yes-Digital","Yes-Paper"))
+lve$OwnOrReadBook <- rep(0,nrow(lve)) #combine own and read into a single binary measure of previous exposure
+lve$OwnOrReadBook[lve$BCread=="Read" | lve$BCread=="PartRead" | lve$BCown=="Yes-Digital" | lve$BCown=="Yes-Paper"] <- 1
+lve$OwnOrReadBook <- factor(lve$OwnOrReadBook, labels=c("No","Yes"))
+
+lve$DemGen <- factor(lve$DemGen, labels=c("Male","Female"))
 
 #Check allocation to conditions
 table(lve$ArgCond)
 
 # remove participants who dropped out before being assigned to conditions
 lve <- subset(lve, !is.na(ArgCond))
-
-####### ---------------------------------
-#######  Sample Characteristics
-####### ---------------------------------
-lve$DemGeo <- factor(lve$DemGeo)
-str(lve$DemGeo)
-lve$DemGen <- factor(lve$DemGen, labels=c("Male","Female"))
-table(lve$DemGen)
-lve$DemYOB <- lve$DemYOB+1919  #values start at 1920=1
-lve$DemAge <- 2012 - lve$DemYOB
-describe(lve$DemAge)
-table(lve$src)
-lve$DemLang <- factor(tolower(lve$DemLang))
-length(lve$DemLang)
-table(lve$DemLang)
 
 ####### ---------------------------------
 #######  Calculated Variables
@@ -98,9 +90,27 @@ qplot(lve$ArgChars[lve$ArgCond=="Arg"], geom="histogram", binwidth=20)
 length(lve$ID[lve$ArgCond=="Arg" & lve$ArgChars<50])
 lve <- subset(lve,xor(lve$ArgCond=="NoArg", lve$ArgChars>50))
 
+#Already Own or have read the book
+length(lve$ID[lve$OwnOrReadBook=="Yes"])
+lve <- subset(lve, lve$OwnOrReadBook=="No")
+
 #Check allocation to conditions
 table(lve$ArgCond)
 
+####### ---------------------------------
+#######  Sample Characteristics
+####### ---------------------------------
+lve$DemGeo <- factor(lve$DemGeo)
+str(lve$DemGeo)
+lve$DemGen <- factor(lve$DemGen, labels=c("Male","Female"))
+table(lve$DemGen)
+lve$DemYOB <- lve$DemYOB+1919  #values start at 1920=1
+lve$DemAge <- 2012 - lve$DemYOB
+describe(lve$DemAge)
+table(lve$src)
+lve$DemLang <- factor(tolower(lve$DemLang))
+length(lve$DemLang)
+table(lve$DemLang)
 
 ####### ---------------------------------
 #######  Create composite measures
@@ -157,7 +167,7 @@ t.test(PercEdRev ~ ArgCond, data=lve)
 table(lve$ArgCond, lve$bookReq)
 chisq.test(lve$ArgCond, lve$bookReq)
 summary(glm(bookReq ~ ArgCond + sv6, data=lve))
-
+summary(glm(bookReq ~ ArgCond + sv6 + log(TimeScen) + log(TotalTime), data=lve))
 
 ####### ---------------------------------
 #######  Failures of Randomization?
