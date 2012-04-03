@@ -5,7 +5,7 @@ library(psych)
 #######  Data Prep
 ####### ---------------------------------
 
-#load data
+#load ratings data 
 sva <- read.csv("http://swift.cbdr.cmu.edu/data/SVA-data-2012-03-21.csv", stringsAsFactors=F)
 
 #set empty strings to NA
@@ -21,3 +21,18 @@ sva <- rename(sva, c("V6"="IP","V8"="StartTime","V9"="EndTime","X186k_miles"="18
 sva$ID <- factor(c(1:nrow(sva)))
 
 ratings <- as.data.frame(t(sapply(sva[4:27],describe)))
+ratings$code <- rownames(ratings)
+
+#combine summer_tires and winter_tires into seasonal_tires
+M_seasonsal_tires <- mean(c(ratings[["summer_tires","mean"]],ratings[["winter_tires","mean"]]))
+ratings[nrow(ratings)+1,] <- c(1,30,M_seasonsal_tires,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"seasonal_tires")
+
+#load text mapping table
+sva.tmap <- read.csv("http://swift.cbdr.cmu.edu/data/SVA-text-mapping-2012-04-03.csv",stringsAsFactors=F)
+sva.tmap$X <-NULL
+sva.tmap$words <- apply(sva.tmap, 1, function(row){paste(row[4:ncol(sva.tmap)],collapse=",")})
+sva.tmap$words <- gsub(",,","",sva.tmap$words)
+
+#merge mapped values and ratings
+sva <- merge(sva.tmap[1:4], ratings, all.x=T, all.y=T)
+

@@ -165,5 +165,5 @@ bargraph.CI(ArgCond,RP,group=RoleCond,data=ABS2, ylim=c(2000,2500), legend=T, yl
 table(ABS2$DemOwnCar)
 carowners <- subset(ABS2,ABS2$DemOwnCar=="OwnsCar")
 summary(aov(DemCarSat ~ ArgCond*RoleCond, data=carowners))
-bargraph.CI(RoleCond, DemCarSat, group=ArgCond, data=carowners, legend=T, y.leg=7, x.leg=1, ylim=c(1,7))
+bargraph.CI(RoleCond, DemCarSat, group=ArgCond, data=carowners, legend=T, y.leg=7, x.leg=1, ylim=c(1,7),ylab="Satisfaction", main="ABS2: Role x Condition on Satisfaction with own real car")
 describe.by(ABS2$DemCarSat, ABS2$RoleCond)

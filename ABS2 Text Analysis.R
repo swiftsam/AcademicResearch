@@ -19,6 +19,17 @@ table(ABS2$RoleCond)
 #######  Create Corpus
 ####### ---------------------------------
 
+#All free response of salient attributes
+corpSal <- Corpus(DataframeSource(data.frame(ABS2["AttrSalFre"])))
+corpSal <- tm_map(corpSal, removePunctuation)
+corpSal <- tm_map(corpSal, tolower)
+corpSal <- tm_map(corpSal, function(x) removeWords(x, stopwords("english")))
+corpSal.tdm <- TermDocumentMatrix(corpSal)
+
+m <- as.matrix(corpSal.tdm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
 #Free response of salient attributes (Buyer)
 corpSal.B <- Corpus(DataframeSource(data.frame(ABS2[ABS2$RoleCond=="Buyer", "AttrSalFre"])))
 corpSal.B <- tm_map(corpSal.B, removePunctuation)
@@ -50,6 +61,18 @@ dsa$freqSum <- dsa$freqB + dsa$freqS
 dsa$relFreqDiff <- dsa$freqDiff/dsa$freqSum
 dsa <- arrange(dsa,relFreqDiff)
 dsa15 <- subset(dsa,freqSum > 15)
+
+
+#All Arguments
+corpArg <- Corpus(DataframeSource(data.frame(ABS2["Arg"])))
+corpArg <- tm_map(corpArg, removePunctuation)
+corpArg <- tm_map(corpArg, tolower)
+corpArg <- tm_map(corpArg, function(x) removeWords(x, stopwords("english")))
+corpArg.tdm <- TermDocumentMatrix(corpArg)
+
+m.cA <- as.matrix(corpArg.tdm)
+v.cA <- sort(rowSums(m.cA),decreasing=TRUE)
+d.cA <- data.frame(word = names(v.cA),freq=v.cA)
 
 
 #Arguments (Buyer)
@@ -88,14 +111,14 @@ darg15 <- subset(darg,freqSum > 15)
 library(ggplot2)
 
 ggplot(darg15, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
-  geom_bar(aes(fill=freqSum)) + 
+  geom_bar(aes(fill=log(freqSum))) + 
   coord_flip() +
   xlab("Words") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
   opts(title="Relative word use in Argument by Role")
 
 ggplot(dsa15, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
-  geom_bar(aes(fill=freqSum)) + 
+  geom_bar(aes(fill=log(freqSum))) + 
   coord_flip() +
   xlab("Words") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
