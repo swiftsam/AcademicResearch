@@ -3,7 +3,7 @@ library(plyr)
 library(ggplot2)
 library(sciplot)
 library(psych)
-library(lme4)
+library(nlme)
 
 ####### ---------------------------------
 #######  Data Prep
@@ -166,6 +166,9 @@ ASM$ResReact <- rowMeans(
     ),
   na.rm=TRUE)
 
+alpha(ASM[c("IssWYr","IssWMi","IssWCon","IssWMod","IssWMat","IssWExt","IssWSafe","IssWFuel")])
+
+
 ####### ---------------------------------
 #######  Effects of Condition on Outcomes
 ####### ---------------------------------
@@ -173,8 +176,8 @@ ASM$ResReact <- rowMeans(
 #Does subjective value of the car vary by condition?
 summary(aov(sv5 ~ ArgCond, data=ASM))
 qplot(ArgCond,sv5,data=ASM,geom="boxplot")
-
 bargraph.CI(ArgCond,sv5, data=ASM, legend=T)
+
 sv5.lm <- lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)
 summary(sv5.lm)
 
@@ -199,36 +202,46 @@ chisq.test(ASM$ArgCond, ASM$ResAccept)
 #######  Process Hypotheses
 ####### ---------------------------------
 
-#Does recall vary by argument condition?
+#Subset the argument condition
+ASM.arg <- subset(ASM, ArgCond=="Arg")
+
+####### Arg --> Salience
+####### -------------------------------------
+#Does recall/salience vary by argument condition?
 summary(glm(AttrSalYrCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Model Year
 summary(glm(AttrSalMiCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Mileage
 summary(lm(AttrSalModCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Make & Model
 summary(lm(AttrSalExtCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Extras
 
-#Does recall of different attributes affect outcomes?
+#Does the use of a specific argument increase the recall of the related fact?
+table     (ASM.arg$ArgUseMi,ASM.arg$AttrSalMiCoded) # Mileage
+chisq.test(ASM.arg$ArgUseMi,ASM.arg$AttrSalMiCoded)
+table     (ASM.arg$ArgUseYr,ASM.arg$AttrSalYrCoded) # Model Year
+chisq.test(ASM.arg$ArgUseYr,ASM.arg$AttrSalYrCoded)
+
+####### Salience --> Subjective Value
+####### -------------------------------------
+#Does recall/salience of different attributes affect outcomes?
 summary(lm(sv5 ~ ArgCond + log(OtherTime) + log(ArgTime) + AttrSalMiCoded + AttrSalYrCoded + AttrSalModCoded + AttrSalExtCoded, data=ASM))
 summary(lm(RP ~ ArgCond + log(OtherTime) + log(ArgTime) + AttrSalMiCoded + AttrSalYrCoded + AttrSalModCoded + AttrSalExtCoded, data=ASM))
 summary(glm(as.integer(ResAccept)-1 ~ ArgCond + log(OtherTime) + log(ArgTime) + AttrSalMiCoded + AttrSalYrCoded + AttrSalModCoded + AttrSalExtCoded, data=ASM))
 
-#Subset the argument condition
-ASM.arg <- subset(ASM, ArgCond=="Arg")
-
-#Does the use of a specific argument increase the recall of the related fact?
-table(ASM.arg$ArgUseMi,ASM.arg$AttrSalMiCoded)
-chisq.test(ASM.arg$ArgUseMi,ASM.arg$AttrSalMiCoded)
-
-table(ASM.arg$ArgUseYr,ASM.arg$AttrSalYrCoded)
-chisq.test(ASM.arg$ArgUseYr,ASM.arg$AttrSalYrCoded)
-
-#Does the use of specific arguments increase the weight placed on that issue?
-ArgUse.long <- melt(ASM.arg[c("ID","ArgUseYr","ArgUseMi","ArgUseCon","ArgUseSafe","ArgUseFuel")],id="ID")
-IssW.long <- melt(ASM.arg[c("ID","IssWYr","IssWMi","IssWCon","IssWSafe","IssWFuel")],id="ID")
-
+####### Arg --> Issue Weight
+####### -------------------------------------
+#Is the use of an argument associated with placing more weight on that issue?
+ArgUse.long    <- melt(ASM.arg[c("ID","ArgUseYr","ArgUseMi","ArgUseCon","ArgUseSafe","ArgUseFuel")],id="ID")
+IssW.long      <- melt(ASM.arg[c("ID","IssWYr","IssWMi","IssWCon","IssWSafe","IssWFuel")],id="ID")
 UseWeight.long <- data.frame(ArgUse.long,IssW.long[3])
 names(UseWeight.long) <- c("ID","Topic","ArgUse","IssW")
+summary(lme(IssW ~ factor(ArgUse),random=~1|ID, data=UseWeight.long,na.action="na.exclude"))
 
-lmer(IssW ~ factor(ArgUse) + (1|ID), data=UseWeight.long)
+####### Issue Weight --> Subjective Value
+####### -------------------------------------
+#Do the weights placed on certain issues predict outcomes?
+summary(lm(sv5 ~ IssWYr + IssWMi + IssWCon + IssWMod + IssWMat + IssWExt + IssWSafe + IssWFuel, data=ASM))
 
+####### Arg --> Subjective Value
+####### -------------------------------------
 
 #Does the number of arguments made use predict outcomes?
 summary(lm(sv5 ~ ArgUseSum + log(OtherTime) + log(ArgTime), data=ASM))
@@ -238,21 +251,6 @@ summary(glm(as.integer(ResAccept)-1 ~ ArgUseSum + log(OtherTime) + log(ArgTime),
 #Do the use of specific arguments predict outcomes?
 summary(lm(sv5 ~ ArgUseMi + ArgUseYr + ArgUseCon + ArgUseSafe + ArgUseParts + ArgUseFuel + ArgUseOther, data=ASM.arg))
 summary(lm(RP ~ ArgUseMi + ArgUseYr + ArgUseCon + ArgUseSafe + ArgUseParts + ArgUseFuel + ArgUseOther, data=ASM.arg))
-
-#Does the use 
-t.test(IssWYr ~ factor(ArgUseYr), data=ASM.arg)
-
-
-
-describe.by(ASM.arg$sv5, ASM.arg$ArgUseYr)
-
-
-
-#Reshape the relevant columns for fixed effect analysis
-
-
-#Does the use of an argument affect the weight placed on the corresponding issue?
-
 
 
 
