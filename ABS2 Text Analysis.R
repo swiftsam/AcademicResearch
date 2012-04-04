@@ -21,8 +21,8 @@ source("SVA Analysis.R")
 ####### ---------------------------------
 
 #function to calculate word frequency in a set
-wordFreqList <- function(df){
-  corp <- Corpus(VectorSource(df))
+wordFreq <- function(vec){
+  corp <- Corpus(VectorSource(vec))
   corp <- tm_map(corp, removePunctuation)
   corp <- tm_map(corp, tolower)
   corp <- tm_map(corp, function(x) removeWords(x, stopwords("english")))
@@ -61,8 +61,15 @@ topicFreq <- function(wf, wvm){
 }
 
 #function to compute sum topic value of a set
-topicValue <- function(df,wvm){
-  
+topicValueSum <- function(arg,wvm=wordValueMap){
+  wf <- wordFreq(arg)
+  tf <- topicFreq(wf,wvm)
+  tf <- merge(tf, wvm, by.x="topic",by.y="code",all.x)
+  tf <- tf[c("topic","freq","rating")]
+  tf <- unique(tf)
+  tf$value <- tf$freq * tf$rating
+  tf$value[is.na(tf$value)]<-0
+  valueSum <- sum(tf$value)
 }
 
 
@@ -71,22 +78,22 @@ topicValue <- function(df,wvm){
 ####### ---------------------------------
 
 #All free response of salient attributes
-wf.Sal <- wordFreqList(ABS2[,"AttrSalFre"])
+wf.Sal <- wordFreq(ABS2[,"AttrSalFre"])
 
 #Free response of salient attributes (Buyer)
-wf.Sal.B <- wordFreqList(ABS2[ABS2$RoleCond=="Buyer", "AttrSalFre"])
+wf.Sal.B <- wordFreq(ABS2[ABS2$RoleCond=="Buyer", "AttrSalFre"])
 
 #Free response of salient attributes (Seller)
-wf.Sal.S <- wordFreqList(ABS2[ABS2$RoleCond=="Seller", "AttrSalFre"])
+wf.Sal.S <- wordFreq(ABS2[ABS2$RoleCond=="Seller", "AttrSalFre"])
 
 #All Arguments
-wf.Arg <- wordFreqList(ABS2[ABS2$ArgCond=="Arg","Arg"])
+wf.Arg <- wordFreq(ABS2[ABS2$ArgCond=="Arg","Arg"])
 
 #Buyer Arguments
-wf.Arg.B <- wordFreqList(ABS2[ABS2$ArgCond=="Arg" & ABS2$RoleCond=="Buyer","Arg"])
+wf.Arg.B <- wordFreq(ABS2[ABS2$ArgCond=="Arg" & ABS2$RoleCond=="Buyer","Arg"])
 
 #Seller Arguments
-wf.Arg.S <-wordFreqList(ABS2[ABS2$ArgCond=="Arg" & ABS2$RoleCond=="Seller","Arg"])
+wf.Arg.S <-wordFreq(ABS2[ABS2$ArgCond=="Arg" & ABS2$RoleCond=="Seller","Arg"])
 
 ####### ---------------------------------
 #######  Convert Word Frequency to Topic Frequency
@@ -123,6 +130,37 @@ wfDiff.BS.Sal <- merge(wfDiff.BS.Sal,wordValueMap,all.x=T)
 
 tfDiff.BS.Arg <- merge(tfDiff.BS.Arg,ratings[c("mean","code")],by.x="topic",by.y="code",all.x=T)
 tfDiff.BS.Sal <- merge(tfDiff.BS.Sal,ratings[c("mean","code")],by.x="topic",by.y="code",all.x=T)
+
+####### ---------------------------------
+#######  Compare Individual-level Argument and Salience Value
+####### ---------------------------------
+for(i in 1:nrow(ABS2)){
+  argVal <- 0
+  if(!is.na(ABS2[i,"Arg"])){
+    argVal <- topicValueSum(ABS2[i,"Arg"])
+  }  
+  ABS2[i,"ArgValue"] <- argVal
+}
+#log transform the positively skewed ArgValue maybe?
+ABS2$ArgValueTrans <- log(ABS2$ArgValue + (1-ABS2$ArgValue))
+
+
+#Is argument value different by Role Condition?
+ABS2.arg <- subset(ABS2,ArgCond=="Arg")
+t.test(ArgValue ~ RoleCond, data=ABS2.arg)
+
+#Does ArgValue predict ...
+summary(lm(sv5 ~ ArgValue + RoleCond, data=ABS2.arg))  #sv5
+
+summary(lm(ArgValue ~ ArgCond*RoleCond, data=ABS2))
+summary(lm(sv5 ~ RoleCond, data=ABS2.arg))
+summary(lm(sv5 ~ RoleCond + ArgValue, data=ABS2.arg))
+summary(lm(ArgValue ~ RoleCond, data=ABS2.arg))
+
+source("preacherhayes.R")
+bm.bootstrapmed(ABS2$ArgCond, ABS2$ArgValue, ABS2$sv5)
+
+bm.med(ABS2$ArgCond, ABS2$ArgValue, ABS2$sv5)
 
 ####### ---------------------------------
 #######  Plots
