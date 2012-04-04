@@ -2,6 +2,7 @@ library(plyr)
 library(ggplot2)
 library(sciplot)
 library(psych)
+source("mediation.R")
 
 ####### ---------------------------------
 #######  Data Prep
@@ -165,5 +166,59 @@ bargraph.CI(ArgCond,RP,group=RoleCond,data=ABS2, ylim=c(2000,2500), legend=T, yl
 table(ABS2$DemOwnCar)
 carowners <- subset(ABS2,ABS2$DemOwnCar=="OwnsCar")
 summary(aov(DemCarSat ~ ArgCond*RoleCond, data=carowners))
-bargraph.CI(RoleCond, DemCarSat, group=ArgCond, data=carowners, legend=T, y.leg=7, x.leg=1, ylim=c(1,7),ylab="Satisfaction", main="ABS2: Role x Condition on Satisfaction with own real car")
+#bargraph.CI(RoleCond, DemCarSat, group=ArgCond, data=carowners, legend=T, y.leg=7, x.leg=1, ylim=c(1,7),ylab="Satisfaction", main="ABS2: Role x Condition on Satisfaction with own real car")
 describe.by(ABS2$DemCarSat, ABS2$RoleCond)
+
+####### ---------------------------------
+#######  Process Tests
+####### ---------------------------------
+
+source("ABS2 Text Analysis.R")
+
+#Is argument value different by Role Condition?
+ABS2.arg <- subset(ABS2,ArgCond=="Arg")
+t.test(ArgValue ~ RoleCond, data=ABS2.arg)
+
+#Does ArgValue predict ...
+# sv5
+summary(lm(sv5 ~ ArgValue*RoleCond, data=ABS2))
+# sv5 with time controls
+summary(lm(sv5 ~ ArgValue*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2.arg))  
+# RP
+summary(lm(RP ~ ArgValue*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2.arg))  
+# Decision to Accept
+summary(glm(as.integer(ResAccept)-1 ~ ArgValue*RoleCond, data=ABS2.arg))  
+
+
+bm.bootstrapmed(ABS2.arg$ArgValue, ABS2.arg$SalValue, ABS2.arg$sv5)
+bm.bootstrapmed(ABS2.arg$ArgValue, ABS2.arg$IssWValue, ABS2.arg$sv5)
+
+bm.med(ABS2.arg$ArgValue, ABS2.arg$SalValue, ABS2.arg$sv5)
+bm.med(ABS2.arg$ArgValue, ABS2.arg$IssWValue, ABS2.arg$sv5)
+
+bm.bootstrapmed(ABS2$ArgValue, ABS2$SalValue, ABS2$sv5)
+bm.bootstrapmed(ABS2$ArgValue, ABS2$IssWValue, ABS2$sv5)
+
+summary(lm(sv5~ArgValue + SalValue + IssWValue, data=ABS2))
+
+#Does Arg Typicality predict ...
+summary(lm(sv5 ~ ArgTyp*RoleCond, data=ABS2))
+
+lm.b <- lm(sv5 ~ ArgTyp, data=ABS2.arg[ABS2.arg$RoleCond=="Buyer",])
+summary(lm.b)
+lm.s <- lm(sv5 ~ ArgTyp, data=ABS2.arg[ABS2.arg$RoleCond=="Seller",])
+summary(lm.s)
+
+ggplot(ABS2.arg, aes(ArgTyp,sv5)) +
+geom_point(aes(color=RoleCond)) +
+geom_smooth(aes(group=RoleCond, color=RoleCond), method="lm")+
+opts(title="Argument typicality x Role on Subjective Value")
+
+ggplot(ABS2.arg, aes(ArgValue,sv5)) +
+  geom_point(aes(color=RoleCond)) +
+  geom_smooth(aes(group=RoleCond, color=RoleCond), method="lm")+
+  opts(title="Argument Value x Role on Subjective Value")
+
+
+bm.bootstrapmed(ABS2.arg$ArgTyp, ABS2.arg$SalValue, ABS2.arg$sv5)
+
