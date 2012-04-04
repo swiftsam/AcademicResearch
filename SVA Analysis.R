@@ -21,6 +21,7 @@ sva <- rename(sva, c("V6"="IP","V8"="StartTime","V9"="EndTime","X186k_miles"="18
 sva$ID <- factor(c(1:nrow(sva)))
 
 ratings <- as.data.frame(t(sapply(sva[4:27],describe)))
+ratings$mean <- as.numeric(ratings$mean)
 ratings$code <- rownames(ratings)
 
 #combine summer_tires and winter_tires into seasonal_tires
@@ -53,8 +54,10 @@ for(i in 1:nrow(sva.rated)){
     wordValueMap <- rbind(wordValueMap,row)
   }
 }
+wordValueMap <- wordValueMap[!is.na(wordValueMap$word),]
 wordValueMap$rating <- as.numeric(wordValueMap$rating)
-  
+row.names(wordValueMap) <- wordValueMap$word
+
 #clean up local variables
 rm(row,code,i,word,wordList,words,rating,M_seasonsal_tires)
 
