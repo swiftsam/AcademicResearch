@@ -36,3 +36,28 @@ sva.tmap$words <- gsub(",,","",sva.tmap$words)
 #merge mapped values and ratings
 sva <- merge(sva.tmap[1:4], ratings, all.x=T, all.y=T)
 
+#create word-value df
+sva.rated <- subset(sva,rated=1)
+
+wordValueMap <- data.frame(matrix(ncol = 3))
+names(wordValueMap) <- c("word","code","rating")
+
+for(i in 1:nrow(sva.rated)){
+  code <- sva.rated[i,"code"]
+  rating <-sva.rated[[i,"mean"]]
+  words <- sva.rated[i,"words"]
+  wordList <- strsplit(words,",")
+  for(word in wordList){
+    row <- data.frame(word,code,rating)
+    names(row) <- c("word","code","rating")
+    wordValueMap <- rbind(wordValueMap,row)
+  }
+}
+wordValueMap$rating <- as.numeric(wordValueMap$rating)
+  
+#clean up local variables
+rm(row,code,i,word,wordList,words,rating,M_seasonsal_tires)
+
+
+
+

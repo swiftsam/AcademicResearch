@@ -75,18 +75,30 @@ wfDiff.BS.Sal <- wordFreqDiff(wf.Sal.B, wf.Sal.S, 15)
 wfDiff.BS.Arg <- wordFreqDiff(wf.Arg.B, wf.Arg.S, 15)
 
 ####### ---------------------------------
+#######  Match Word Frequency to coded values
+####### ---------------------------------
+
+source("SVA Analysis.R")
+wfDiff.BS.Arg <- merge(wfDiff.BS.Arg,wordValueMap,all.x=T)
+wfDiff.BS.Sal <- merge(wfDiff.BS.Sal,wordValueMap,all.x=T)
+
+
+
+####### ---------------------------------
 #######  Plots
 ####### ---------------------------------
 
 ggplot(wfDiff.BS.Sal, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
-  geom_bar(aes(fill=log(freqSum))) + 
+  geom_bar(aes(fill=rating)) +
+  scale_fill_continuous(limits=c(-1.75, 1.75), low="red",high="green") +
   coord_flip() +
   xlab("Words") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
   opts(title="Relative word use in 'Most Memorable Details' by Role")
 
 ggplot(wfDiff.BS.Arg, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
-  geom_bar(aes(fill=log(freqSum))) + 
+  geom_bar(aes(fill=rating)) + 
+  scale_fill_continuous(limits=c(-1.75, 1.75), low="red",high="green") +
   coord_flip() +
   xlab("Words") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
