@@ -1,5 +1,6 @@
 library(plyr)
 library(tm)
+library(ggplot2)
 
 #ABS Text analysis
 
@@ -15,112 +16,79 @@ source("ABS2 Data Prep.R")
 
 table(ABS2$RoleCond)
 
+#function to calculate word frequency in a set
+wordFreqList <- function(df){
+  corp <- Corpus(VectorSource(df))
+  corp <- tm_map(corp, removePunctuation)
+  corp <- tm_map(corp, tolower)
+  corp <- tm_map(corp, function(x) removeWords(x, stopwords("english")))
+  corp.tdm <- TermDocumentMatrix(corp) 
+  
+  m <- as.matrix(corp.tdm)
+  v <- sort(rowSums(m),decreasing=TRUE)
+  d <- data.frame(word = names(v),freq=v)
+}
+
+#function to compare word frequency between two sets
+wordFreqDiff <- function(x,y, minFreq = 0){
+  df             <- merge(x,y,all.x=T, all.y=T,by="word")
+  names(df)      <- c("word","freqX","freqY")
+  df[is.na(df)]  <- 0
+  df$freqDiff    <- df$freqX-df$freqY
+  df$freqSum     <- df$freqX + df$freqY
+  df$relFreqDiff <- df$freqDiff/df$freqSum
+  df             <- arrange(df,relFreqDiff)
+  dfMin          <- subset(df,freqSum > minFreq)
+}
+
+
 ####### ---------------------------------
-#######  Create Corpus
+#######  Generate Word Frequency Lists
 ####### ---------------------------------
 
 #All free response of salient attributes
-corpSal <- Corpus(DataframeSource(data.frame(ABS2["AttrSalFre"])))
-corpSal <- tm_map(corpSal, removePunctuation)
-corpSal <- tm_map(corpSal, tolower)
-corpSal <- tm_map(corpSal, function(x) removeWords(x, stopwords("english")))
-corpSal.tdm <- TermDocumentMatrix(corpSal)
-
-m <- as.matrix(corpSal.tdm)
-v <- sort(rowSums(m),decreasing=TRUE)
-d <- data.frame(word = names(v),freq=v)
+wf.Sal <- wordFreqList(ABS2[,"AttrSalFre"])
 
 #Free response of salient attributes (Buyer)
-corpSal.B <- Corpus(DataframeSource(data.frame(ABS2[ABS2$RoleCond=="Buyer", "AttrSalFre"])))
-corpSal.B <- tm_map(corpSal.B, removePunctuation)
-corpSal.B <- tm_map(corpSal.B, tolower)
-corpSal.B <- tm_map(corpSal.B, function(x) removeWords(x, stopwords("english")))
-corpSal.B.tdm <- TermDocumentMatrix(corpSal.B)
-
-m.B <- as.matrix(corpSal.B.tdm)
-v.B <- sort(rowSums(m.B),decreasing=TRUE)
-d.B <- data.frame(word = names(v.B),freq=v.B)
+wf.Sal.B <- wordFreqList(ABS2[ABS2$RoleCond=="Buyer", "AttrSalFre"])
 
 #Free response of salient attributes (Seller)
-corpSal.S <- Corpus(DataframeSource(data.frame(ABS2[ABS2$RoleCond=="Seller", "AttrSalFre"])))
-corpSal.S <- tm_map(corpSal.S, removePunctuation)
-corpSal.S <- tm_map(corpSal.S, tolower)
-corpSal.S <- tm_map(corpSal.S, function(x) removeWords(x, stopwords("english")))
-corpSal.S.tdm <- TermDocumentMatrix(corpSal.S)
-
-m.S <- as.matrix(corpSal.S.tdm)
-v.S <- sort(rowSums(m.S),decreasing=TRUE)
-d.S <- data.frame(word = names(v.S),freq=v.S)
-
-#Buyer-Seller differences in salient attributes
-dsa <- merge(d.B,d.S,all.x=T, all.y=T,by="word")
-names(dsa)<- c("word","freqB","freqS")
-dsa[is.na(dsa)] <- 0
-dsa$freqDiff <- dsa$freqB-dsa$freqS
-dsa$freqSum <- dsa$freqB + dsa$freqS
-dsa$relFreqDiff <- dsa$freqDiff/dsa$freqSum
-dsa <- arrange(dsa,relFreqDiff)
-dsa15 <- subset(dsa,freqSum > 15)
-
+wf.Sal.S <- wordFreqList(ABS2[ABS2$RoleCond=="Seller", "AttrSalFre"])
 
 #All Arguments
-corpArg <- Corpus(DataframeSource(data.frame(ABS2["Arg"])))
-corpArg <- tm_map(corpArg, removePunctuation)
-corpArg <- tm_map(corpArg, tolower)
-corpArg <- tm_map(corpArg, function(x) removeWords(x, stopwords("english")))
-corpArg.tdm <- TermDocumentMatrix(corpArg)
+wf.Arg <- wordFreqList(ABS2[ABS2$ArgCond=="Arg","Arg"])
 
-m.cA <- as.matrix(corpArg.tdm)
-v.cA <- sort(rowSums(m.cA),decreasing=TRUE)
-d.cA <- data.frame(word = names(v.cA),freq=v.cA)
+#Buyer Arguments
+wf.Arg.B <- wordFreqList(ABS2[ABS2$ArgCond=="Arg" & ABS2$RoleCond=="Buyer","Arg"])
 
+#Seller Arguments
+wf.Arg.S <-wordFreqList(ABS2[ABS2$ArgCond=="Arg" & ABS2$RoleCond=="Seller","Arg"])
 
-#Arguments (Buyer)
-corpArg.B <- Corpus(DataframeSource(data.frame(ABS2[ABS2$ArgCond=="Arg" & ABS2$RoleCond=="Buyer", "Arg"])))
-corpArg.B <- tm_map(corpArg.B, removePunctuation)
-corpArg.B <- tm_map(corpArg.B, tolower)
-corpArg.B <- tm_map(corpArg.B, function(x) removeWords(x, stopwords("english")))
-corpArg.B.tdm <- TermDocumentMatrix(corpArg.B)
+####### ---------------------------------
+#######  Compare Word Frequency by Role
+####### ---------------------------------
 
-m.cAB <- as.matrix(corpArg.B.tdm)
-v.cAB <- sort(rowSums(m.cAB),decreasing=TRUE)
-d.cAB <- data.frame(word = names(v.cAB),freq=v.cAB)
-
-#Arguments (Seller)
-corpArg.S <- Corpus(DataframeSource(data.frame(ABS2[ABS2$ArgCond=="Arg" & ABS2$RoleCond=="Seller", "Arg"])))
-corpArg.S <- tm_map(corpArg.S, removePunctuation)
-corpArg.S <- tm_map(corpArg.S, tolower)
-corpArg.S <- tm_map(corpArg.S, function(x) removeWords(x, stopwords("english")))
-corpArg.S.tdm <- TermDocumentMatrix(corpArg.S)
-
-m.cAS <- as.matrix(corpArg.S.tdm)
-v.cAS <- sort(rowSums(m.cAS),decreasing=TRUE)
-d.cAS <- data.frame(word = names(v.cAS),freq=v.cAS)
+#Buyer-Seller differences in salient attributes
+wfDiff.BS.Sal <- wordFreqDiff(wf.Sal.B, wf.Sal.S, 15)
 
 #Buyer-Seller differences in arguments
-darg <- merge(d.cAB,d.cAS,all.x=T, all.y=T,by="word")
-names(darg)<- c("word","freqB","freqS")
-darg[is.na(darg)] <- 0
-darg$freqDiff <- darg$freqB-darg$freqS
-darg$freqSum <- darg$freqB + darg$freqS
-darg$relFreqDiff <- darg$freqDiff/darg$freqSum
-darg <- arrange(darg,relFreqDiff)
-darg15 <- subset(darg,freqSum > 15)
+wfDiff.BS.Arg <- wordFreqDiff(wf.Arg.B, wf.Arg.S, 15)
 
+####### ---------------------------------
+#######  Plots
+####### ---------------------------------
 
-library(ggplot2)
-
-ggplot(darg15, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
-  geom_bar(aes(fill=log(freqSum))) + 
-  coord_flip() +
-  xlab("Words") +
-  ylab("Relative use by Sellers(-) & Buyers(+)") +
-  opts(title="Relative word use in Argument by Role")
-
-ggplot(dsa15, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
+ggplot(wfDiff.BS.Sal, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
   geom_bar(aes(fill=log(freqSum))) + 
   coord_flip() +
   xlab("Words") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
   opts(title="Relative word use in 'Most Memorable Details' by Role")
+
+ggplot(wfDiff.BS.Arg, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
+  geom_bar(aes(fill=log(freqSum))) + 
+  coord_flip() +
+  xlab("Words") +
+  ylab("Relative use by Sellers(-) & Buyers(+)") +
+  opts(title="Relative word use in Argument by Role")
 
