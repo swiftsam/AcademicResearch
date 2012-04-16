@@ -81,14 +81,14 @@ length(lve$ID[lve$TotalTime<120])
 #Time spent reading scenario
 describe(lve$TimeScen)
 qplot(lve$TimeScen, geom="histogram", xlim=c(0,250))
-length(lve$ID[lve$TimeScen<50])
-lve <- subset(lve,lve$TimeScen > 50)
+length(lve$ID[lve$TimeScen<30])
+#lve <- subset(lve,lve$TimeScen > 30)
 
 #Length of argument written
 describe(lve$ArgChars[lve$ArgCond=="Arg"])
 qplot(lve$ArgChars[lve$ArgCond=="Arg"], geom="histogram", binwidth=20)
 length(lve$ID[lve$ArgCond=="Arg" & lve$ArgChars<50])
-lve <- subset(lve,xor(lve$ArgCond=="NoArg", lve$ArgChars>50))
+#lve <- subset(lve,xor(lve$ArgCond=="NoArg", lve$ArgChars>50))
 
 #Already Own or have read the book
 length(lve$ID[lve$OwnOrReadBook=="Yes"])
@@ -102,6 +102,7 @@ table(lve$ArgCond)
 ####### ---------------------------------
 lve$DemGeo <- factor(lve$DemGeo)
 str(lve$DemGeo)
+table(lve$DemGeo)
 lve$DemGen <- factor(lve$DemGen, labels=c("Male","Female"))
 table(lve$DemGen)
 lve$DemYOB <- lve$DemYOB+1919  #values start at 1920=1
@@ -137,13 +138,13 @@ lve$sv6 <- rowMeans(
 ####### ---------------------------------
 names(reqs) <- c("timestamp","ip","userKey","email","optin")
 reqs$bookReq <- rep(1,nrow(reqs))
-lve <- merge(lve,reqs[,c("userKey","bookReq")],all.x=T)
+lve <- merge(lve,reqs[,c("userKey","bookReq")],all.x=T, all.y=F)
 lve$bookReq[is.na(lve$bookReq)] <- 0
 
 names(log) <- c("timestamp","ip","userKey")
 nVisit <- ddply(log, c("userKey"),function(df){ nrow(df)})
 names(nVisit) <- c("userKey","nVisits")
-lve <- merge(lve,nVisit,all.x=T)
+lve <- merge(lve,nVisit,all.x=T, all.y=F)
 lve$nVisits[is.na(lve$nVisits)] <- 0
 
 ####### ---------------------------------

@@ -85,7 +85,9 @@ length(ABS2$DemLang)
 table(ABS2$DemLang)
 
 ABS2$DemOwnCar <- factor(ABS2$DemOwnCar, labels=c("OwnsCar","DoesNotOwnCar"))
+table(ABS2$DemOwnCar)
 ABS2$DemCarPurc <- factor(ABS2$DemCarPurc, labels=c("HavePurchased","HaveNotPurchased"))
+table(ABS2$DemCarPurc)
 carbuyers <- subset(ABS2, ABS2$DemCarPurc=="HavePurchased")
 colSums(carbuyers[c("DemCarPTyp_1","DemCarPTyp_2","DemCarPTyp_3","DemCarPTyp_4")],na.rm=T)
 
@@ -143,24 +145,33 @@ summary(sv3.lm)
 #Does subjective value of the car vary by condition (5-item scale)?
 summary(aov(sv5 ~ ArgCond*RoleCond, data=ABS2))
 bargraph.CI(ArgCond,sv5,group=RoleCond, data=ABS2, legend=T, ylab="Subjective Valuation of Car (5 item, Z-score)",main="ABS2: Role x Condition on SV(5) of Car")
+describe.by(ABS2$sv5, ABS2$RoleCond)
 sv5.lm <- (lm(sv5 ~ ArgCond*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2))
 sv5.lm <- (lm(sv5 ~ ArgCond*RoleCond, data=ABS2))
 summary(sv5.lm)
 
 #Does the decision to accept the offer vary by condition?
-table(ABS2$ArgCond, ABS2$ResAccept, ABS2$RoleCond)
-summary(glm(as.integer(ResAccept)-1 ~ ArgCond*RoleCond, data=ABS2))
+table(ABS2$RoleCond, ABS2$ResAccept)
+chisq.test(ABS2$RoleCond, ABS2$ResAccept)
+
+table(ABS2$ArgCond, ABS2$ResAccept)
 chisq.test(ABS2$ArgCond, ABS2$ResAccept)
 
+table(ABS2$ArgCond, ABS2$ResAccept, ABS2$RoleCond)
+summary(glm(as.integer(ResAccept)-1 ~ ArgCond*RoleCond, data=ABS2))
+
+
 #Does reaction to the offer vary by condition?
-summary(aov(ResReact ~ ArgCond, data=ABS2))
+summary(aov(ResReact ~ ArgCond*RoleCond, data=ABS2))
+describe.by(ABS2$ResReact, ABS2$ArgCond)
 bargraph.CI(ArgCond,ResReact,data=ABS2)
 
 #Does RP vary by condition?
 summary(aov(RP ~ ArgCond*RoleCond, data=ABS2))
+describe.by(ABS2$RP, ABS2$RoleCond)
 rp.lm <- lm(RP ~ ArgCond*RoleCond, data=ABS2)
 summary(rp.lm)
-bargraph.CI(ArgCond,RP,group=RoleCond,data=ABS2, ylim=c(2000,2500), legend=T, ylab="Reservation Price", main="ABS2: Role x Condition on Reservation Price")
+bargraph.CI(ArgCond,RP,group=RoleCond,data=ABS2, ylim=c(2000,2500), legend=T, ylab="Reservation Price ($)", main="ABS2: Role x Condition on Reservation Price")
 
 #Does Satisfaction with participants' own actual car vary by condition?
 table(ABS2$DemOwnCar)
