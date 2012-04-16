@@ -11,6 +11,7 @@ library(psych)
 lve <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-data-2012-03-01.csv", stringsAsFactors=F)
 reqs <- read.csv("~/Desktop/reqs.txt", stringsAsFactors=F, header=F)
 log <- read.csv("~/Desktop/log.txt",stringsAsFactors=F, header=F)
+ids <- read.csv("~/Desktop/ids.txt", stringsAsFactors=F, header=F)
 
 #set empty strings to NA
 lve[lve==""] <- NA
@@ -41,6 +42,23 @@ table(lve$ArgCond)
 
 # remove participants who dropped out before being assigned to conditions
 lve <- subset(lve, !is.na(ArgCond))
+
+####### ---------------------------------
+#######  Match survey data with server logs
+####### ---------------------------------
+names(ids) <- c("userKey","timestamp")
+
+names(reqs) <- c("timestamp","ip","userKey","email","optin")
+reqs <- subset(reqs, userKey %in% ids$userKey)
+reqs$bookReq <- rep(1,nrow(reqs))
+lve <- merge(lve,reqs[,c("userKey","bookReq")],all.x=T, all.y=F)
+lve$bookReq[is.na(lve$bookReq)] <- 0
+
+names(log) <- c("timestamp","ip","userKey")
+nVisit <- ddply(log, c("userKey"),function(df){ nrow(df)})
+names(nVisit) <- c("userKey","nVisits")
+lve <- merge(lve,nVisit,all.x=T, all.y=F)
+lve$nVisits[is.na(lve$nVisits)] <- 0
 
 ####### ---------------------------------
 #######  Calculated Variables
@@ -133,19 +151,7 @@ lve$sv6 <- rowMeans(
     ),
   na.rm=TRUE)
 
-####### ---------------------------------
-#######  Match survey data with server logs
-####### ---------------------------------
-names(reqs) <- c("timestamp","ip","userKey","email","optin")
-reqs$bookReq <- rep(1,nrow(reqs))
-lve <- merge(lve,reqs[,c("userKey","bookReq")],all.x=T, all.y=F)
-lve$bookReq[is.na(lve$bookReq)] <- 0
 
-names(log) <- c("timestamp","ip","userKey")
-nVisit <- ddply(log, c("userKey"),function(df){ nrow(df)})
-names(nVisit) <- c("userKey","nVisits")
-lve <- merge(lve,nVisit,all.x=T, all.y=F)
-lve$nVisits[is.na(lve$nVisits)] <- 0
 
 ####### ---------------------------------
 #######  Hypothesis Tests
