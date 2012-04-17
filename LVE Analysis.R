@@ -9,9 +9,9 @@ library(psych)
 
 #load data
 lve <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-data-2012-03-01.csv", stringsAsFactors=F)
-reqs <- read.csv("~/Desktop/reqs.txt", stringsAsFactors=F, header=F)
-log <- read.csv("~/Desktop/log.txt",stringsAsFactors=F, header=F)
-ids <- read.csv("~/Desktop/ids.txt", stringsAsFactors=F, header=F)
+reqs <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-reqs-2012-03-15.csv", stringsAsFactors=F, header=F)
+log <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-log-2012-03-21.csv",stringsAsFactors=F, header=F)
+ids <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-ids-2012-03-05.csv", stringsAsFactors=F, header=F)
 
 #set empty strings to NA
 lve[lve==""] <- NA

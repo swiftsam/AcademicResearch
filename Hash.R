@@ -11,8 +11,8 @@ hashVect <- function(vector) {
   unlist(vector)
 }
 
-hashAndSave <- function(inFname, outFname, cols){
-  df <- read.csv(inFname, stringsAsFactors = F)
+hashAndSave <- function(inFname, outFname, cols,inHeader = T){
+  df <- read.csv(inFname, stringsAsFactors = F, header = inHeader)
   for(i in 1:length(cols)){
     df[,cols[i]] <- hashVect(df[,cols[i]])
   }
