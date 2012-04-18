@@ -309,3 +309,7 @@ TukeyHSD(aov(ExageratePos~ArgCond,data=csc))
 TukeyHSD(aov(ExagerateNeg~ArgCond,data=csc))
   bargraph.CI(ArgCond,ExagerateNeg,ylab="Exageration of Negative Items",xlab="Condition",ylim=c(1,7), main="To what extent did you exaggerate the things you do not like about being an XYZ Wireless customer?")
 
+
+#Text analysis
+
+

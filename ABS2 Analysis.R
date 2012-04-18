@@ -189,17 +189,17 @@ source("ABS2 Text Analysis.R")
 #Is argument value different by Role Condition?
 ABS2.arg <- subset(ABS2,ArgCond=="Arg")
 t.test(ArgValue ~ RoleCond, data=ABS2.arg)
+boxplot(ArgValue ~ RoleCond, data=ABS2.arg)
 
 #Does ArgValue predict ...
 # sv5
-summary(lm(sv5 ~ ArgValue*RoleCond, data=ABS2))
+summary(lm(sv5 ~ ArgValue + RoleCond, data=ABS2.arg))
 # sv5 with time controls
-summary(lm(sv5 ~ ArgValue*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2.arg))  
+summary(lm(sv5 ~ ArgValue + RoleCond + log(OtherTime) + log(ArgTime), data=ABS2.arg))  
 # RP
-summary(lm(RP ~ ArgValue*RoleCond + log(OtherTime) + log(ArgTime), data=ABS2.arg))  
+summary(lm(RP ~ ArgValue, data=ABS2))  
 # Decision to Accept
-summary(glm(as.integer(ResAccept)-1 ~ ArgValue*RoleCond, data=ABS2.arg))  
-
+summary(glm(as.integer(ResAccept)-1 ~ ArgValue*RoleCond, data=ABS2))  
 
 bm.bootstrapmed(ABS2.arg$ArgValue, ABS2.arg$SalValue, ABS2.arg$sv5)
 bm.bootstrapmed(ABS2.arg$ArgValue, ABS2.arg$IssWValue, ABS2.arg$sv5)

@@ -15,6 +15,8 @@ ids <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-ids-2012-03-05.csv", strings
 
 #set empty strings to NA
 lve[lve==""] <- NA
+reqs[reqs==""] <- NA
+log[log==""] <- NA
 
 #remove uncessary columns
 lve <- lve[,!names(lve) %in% c("X.V1","V2","V3","V4","V5","V7","V10","X")]
@@ -49,15 +51,17 @@ lve <- subset(lve, !is.na(ArgCond))
 names(ids) <- c("userKey","timestamp")
 
 names(reqs) <- c("timestamp","ip","userKey","email","optin")
-reqs <- subset(reqs, userKey %in% ids$userKey)
-reqs$bookReq <- rep(1,nrow(reqs))
-lve <- merge(lve,reqs[,c("userKey","bookReq")],all.x=T, all.y=F)
-lve$bookReq[is.na(lve$bookReq)] <- 0
+nBookReqs <- ddply(reqs, c("userKey"),function(df){ nrow(df)})
+names(nBookReqs) <- c("userKey","nBookReqs")
+lve <- merge(lve,nBookReqs,all.x=T)
+lve$nBookReqs[is.na(lve$nBookReqs)] <- 0
+lve$bookReq <- lve$nBookReqs
+lve$bookReq[lve$bookReq > 0] <- 1
 
 names(log) <- c("timestamp","ip","userKey")
 nVisit <- ddply(log, c("userKey"),function(df){ nrow(df)})
 names(nVisit) <- c("userKey","nVisits")
-lve <- merge(lve,nVisit,all.x=T, all.y=F)
+lve <- merge(lve,nVisit,all.x=T)
 lve$nVisits[is.na(lve$nVisits)] <- 0
 
 ####### ---------------------------------
@@ -76,11 +80,43 @@ lve$TotalTime <- -as.double(lve$Starttime - lve$Endtime) #number of seconds betw
 lve$TimeScen <- lve$TimeIntro_3 + lve$TimeDesc_3 + lve$TimeTask_3
 
 ####### ---------------------------------
+#######  Failures of Randomization?
+####### ---------------------------------
+
+#Did the samples differ in how long they looked at the book info?
+t.test(TimeDesc_3 ~ ArgCond, data=lve)
+qplot(ArgCond,TimeDesc_3,data=lve, geom="boxplot")
+
+#Did the samples differ in how many clicks on the book info?
+describe.by(lve$TimeDesc_4, lve$ArgCond)
+t.test(log(TimeDesc_4) ~ ArgCond, data=lve)
+qplot(ArgCond,TimeDesc_4,data=lve, geom="boxplot")
+
+#Did the samples differ int terms of time spent reading materials?
+describe.by(lve$TimeScen, lve$ArgCond)
+t.test(log(TimeScen)~ ArgCond, data=lve)
+qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
+
+#Did the samples differ int terms of time spent reading materials?
+describe.by(lve$TimeScen, lve$ArgCond)
+t.test(log(TimeScen)~ ArgCond, data=lve)
+qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
+
+#Did the study take longer for one condition than the other?
+describe.by(lve$TimeScen, lve$ArgCond)
+t.test(log(TimeScen)~ ArgCond, data=lve)
+qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
+
+####### ---------------------------------
 #######  Exclusion Criteria
 ####### ---------------------------------
 #Got to the last page of the study
 length(lve$ID[is.na(lve$Link)])
 lve <- subset(lve,!is.na(lve$Link))
+
+#Already Own or have read the book
+length(lve$ID[lve$OwnOrReadBook=="Yes"])
+lve <- subset(lve, lve$OwnOrReadBook=="No")
 
 #duplicate emails
 length(lve$ID[lve$Emaildup])
@@ -107,10 +143,6 @@ describe(lve$ArgChars[lve$ArgCond=="Arg"])
 qplot(lve$ArgChars[lve$ArgCond=="Arg"], geom="histogram", binwidth=20)
 length(lve$ID[lve$ArgCond=="Arg" & lve$ArgChars<50])
 #lve <- subset(lve,xor(lve$ArgCond=="NoArg", lve$ArgChars>50))
-
-#Already Own or have read the book
-length(lve$ID[lve$OwnOrReadBook=="Yes"])
-lve <- subset(lve, lve$OwnOrReadBook=="No")
 
 #Check allocation to conditions
 table(lve$ArgCond)
@@ -152,7 +184,6 @@ lve$sv6 <- rowMeans(
   na.rm=TRUE)
 
 
-
 ####### ---------------------------------
 #######  Hypothesis Tests
 ####### ---------------------------------
@@ -176,23 +207,14 @@ chisq.test(lve$ArgCond, lve$bookReq)
 summary(glm(bookReq ~ ArgCond + sv6, data=lve))
 summary(glm(bookReq ~ ArgCond + sv6 + log(TimeScen) + log(TotalTime), data=lve))
 
-####### ---------------------------------
-#######  Failures of Randomization?
-####### ---------------------------------
+#Does the number of requests for the book vary by condition?
+lm.nVisits <- lm(nVisits ~ ArgCond + sv6 + log(TotalTime), data=lve)
+lm.nVisitsLog <- lm(log(nVisits+1) ~ ArgCond + sv6 + log(TotalTime), data=lve)
+plot(lm.nVisits)
 
-#Did the samples differ in how long they looked at the book info?
-t.test(TimeDesc_3 ~ ArgCond, data=lve)
-qplot(ArgCond,TimeDesc_3,data=lve, geom="boxplot")
 
-#Did the samples differ in how many clicks on the book info?
-describe.by(lve$TimeDesc_4, lve$ArgCond)
-t.test(log(TimeDesc_4) ~ ArgCond, data=lve)
-qplot(ArgCond,TimeDesc_4,data=lve, geom="boxplot")
 
-#Did the samples differ int terms of time spent reading materials?
-describe.by(lve$TimeScen, lve$ArgCond)
-t.test(logTimeScen)~ ArgCond, data=lve)
-qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
+
 
 ####### ---------------------------------
 #######  Differences among those who returned for the book?
@@ -221,3 +243,38 @@ qplot(ArgCond,TimeDesc_3,data=requesters, geom="boxplot")
 describe.by(requesters$TimeDesc_4, requesters$ArgCond)
 t.test(log(TimeDesc_4) ~ ArgCond, data=requesters)
 qplot(ArgCond,TimeDesc_4,data=requesters, geom="boxplot")
+
+####### ---------------------------------
+#######  Time 3 follow-up survey
+####### ---------------------------------
+#load data
+lve.t3 <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-followup-2012-03-29.csv", stringsAsFactors=F)
+
+#set empty strings to NA
+lve.t3[lve.t3==""] <- NA
+
+#remove uncessary columns
+lve.t3 <- lve.t3[,!names(lve.t3) %in% c("X.V1","V2","V3","V4","V7","V10","X")]
+#rename unnamed columns
+lve.t3 <- rename(lve.t3, c("V5"="email","V6"="IP","V8"="Starttime","V9"="Endtime","ID"="userKey"))
+
+lve.t3 <- lve.t3[,c("userKey","HaveDown","HaveRead","svExp","svEnjoy","svShare","svStars","IntendRead")]
+
+lve.t3$HaveDown[lve.t3$HaveDown > 1] <- 0
+alpha(lve.t3[,c("svExp","svEnjoy","svShare","svStars")])
+lve.t3$t3sv <- rowMeans(
+  data.frame(
+    scale(lve.t3$svExp),
+    scale(lve.t3$svEnjoy),
+    scale(lve.t3$svShare),
+    scale(lve.t3$svStars)
+    ),
+  na.rm=TRUE)
+
+
+lve.t3 <- merge(lve.t3, lve[,c("userKey","ArgCond")],all.x=T,all.y=F)
+lve <- merge(lve, lve.t3, all.x=T)
+
+
+chisq.test(lve.t3$ArgCond,lve.t3$HaveDown)
+
