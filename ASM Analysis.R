@@ -201,23 +201,57 @@ chisq.test(ASM$ArgCond, ASM$ResAccept)
 ####### ---------------------------------
 #######  Process Hypotheses
 ####### ---------------------------------
-
 #Subset the argument condition
 ASM.arg <- subset(ASM, ArgCond=="Arg")
+
+### Arg use descriptives
+ASM$ArgUseSum <- ASM$ArgUseMi + 
+                 ASM$ArgUseYr + 
+                 ASM$ArgUseCon + 
+                 ASM$ArgUseSafe + 
+                 ASM$ArgUseParts + 
+                 ASM$ArgUseFuel
+describe.by(ASM$ArgUseSum, ASM$ArgCond)
+
+table(ASM.arg$ArgUseMi)
+table(ASM.arg$ArgUseYr)
+table(ASM.arg$ArgUseCon)
+table(ASM.arg$ArgUseSafe)
+table(ASM.arg$ArgUseParts)
+table(ASM.arg$ArgUseFuel)
+table(ASM.arg$ArgUseOther)
+
+### Salience descriptives
+table(ASM$AttrSalYrCoded)
+table(ASM$AttrSalMiCoded)
+table(ASM$AttrSalModCoded)
+table(ASM$AttrSalExtCoded)
+
+ASM$AttrSalSum <- ASM$AttrSalYrCoded +
+                  ASM$AttrSalMiCoded + 
+                  ASM$AttrSalModCoded + 
+                  ASM$AttrSalExtCoded
+describe.by(ASM$AttrSalSum, ASM$ArgCond)
+
+### Weight descriptives
+ASM$IssWMean <- rowMeans(ASM[c("IssWYr","IssWMi","IssWCon","IssWMod","IssWMat","IssWExt","IssWSafe","IssWFuel")],na.rm=T)
+describe.by(ASM$IssWMean, ASM$ArgCond)
 
 ####### Arg --> Salience
 ####### -------------------------------------
 #Does recall/salience vary by argument condition?
-summary(glm(AttrSalYrCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Model Year
-summary(glm(AttrSalMiCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Mileage
-summary(lm(AttrSalModCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Make & Model
-summary(lm(AttrSalExtCoded ~ ArgCond + log(OtherTime) + log(ArgTime), data=ASM)) #Extras
+summary(glm(AttrSalYrCoded ~ ArgCond, data=ASM)) #Model Year
+summary(glm(AttrSalMiCoded ~ ArgCond, data=ASM)) #Mileage
+summary(lm(AttrSalModCoded ~ ArgCond, data=ASM)) #Make & Model
+summary(lm(AttrSalExtCoded ~ ArgCond, data=ASM)) #Extras
 
 #Does the use of a specific argument increase the recall of the related fact?
 table     (ASM.arg$ArgUseMi,ASM.arg$AttrSalMiCoded) # Mileage
 chisq.test(ASM.arg$ArgUseMi,ASM.arg$AttrSalMiCoded)
 table     (ASM.arg$ArgUseYr,ASM.arg$AttrSalYrCoded) # Model Year
 chisq.test(ASM.arg$ArgUseYr,ASM.arg$AttrSalYrCoded)
+
+
 
 ####### Salience --> Subjective Value
 ####### -------------------------------------
@@ -228,6 +262,8 @@ summary(glm(as.integer(ResAccept)-1 ~ ArgCond + log(OtherTime) + log(ArgTime) + 
 
 ####### Arg --> Issue Weight
 ####### -------------------------------------
+#Is there a difference by condition 
+
 #Is the use of an argument associated with placing more weight on that issue?
 ArgUse.long    <- melt(ASM.arg[c("ID","ArgUseYr","ArgUseMi","ArgUseCon","ArgUseSafe","ArgUseFuel")],id="ID")
 IssW.long      <- melt(ASM.arg[c("ID","IssWYr","IssWMi","IssWCon","IssWSafe","IssWFuel")],id="ID")

@@ -84,12 +84,13 @@ lve$TimeScen <- lve$TimeIntro_3 + lve$TimeDesc_3 + lve$TimeTask_3
 ####### ---------------------------------
 
 #Did the samples differ in how long they looked at the book info?
+describe.by(lve$TimeDesc_3, lve$ArgCond)
 t.test(TimeDesc_3 ~ ArgCond, data=lve)
 qplot(ArgCond,TimeDesc_3,data=lve, geom="boxplot")
 
 #Did the samples differ in how many clicks on the book info?
 describe.by(lve$TimeDesc_4, lve$ArgCond)
-t.test(log(TimeDesc_4) ~ ArgCond, data=lve)
+t.test(TimeDesc_4 ~ ArgCond, data=lve)
 qplot(ArgCond,TimeDesc_4,data=lve, geom="boxplot")
 
 #Did the samples differ int terms of time spent reading materials?
@@ -97,15 +98,10 @@ describe.by(lve$TimeScen, lve$ArgCond)
 t.test(log(TimeScen)~ ArgCond, data=lve)
 qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
 
-#Did the samples differ int terms of time spent reading materials?
-describe.by(lve$TimeScen, lve$ArgCond)
-t.test(log(TimeScen)~ ArgCond, data=lve)
-qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
-
 #Did the study take longer for one condition than the other?
-describe.by(lve$TimeScen, lve$ArgCond)
-t.test(log(TimeScen)~ ArgCond, data=lve)
-qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
+describe.by(lve$TotalTime, lve$ArgCond)
+t.test(log(TotalTime)~ ArgCond, data=lve)
+qplot(ArgCond,log(TotalTime),data=lve, geom="boxplot")
 
 ####### ---------------------------------
 #######  Exclusion Criteria

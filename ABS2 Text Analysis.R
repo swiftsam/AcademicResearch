@@ -41,7 +41,7 @@ wordFreq <- function(vec,likelihood=TRUE){
 #function to compare word frequency between two sets
 freqDiff <- function(x,y, by="word", minFreq = 0){
   df             <- merge(x,y,all.x=T, all.y=T,by=by)
-  names(df)      <- c(by,"freqX","freqY")
+  names(df)      <- c("word","freqX","likelihoodX","freqY","likelihoodY")
   df[is.na(df)]  <- 0
   df$freqDiff    <- df$freqX-df$freqY
   df$freqSum     <- df$freqX + df$freqY

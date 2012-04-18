@@ -190,10 +190,11 @@ source("ABS2 Text Analysis.R")
 ABS2.arg <- subset(ABS2,ArgCond=="Arg")
 t.test(ArgValue ~ RoleCond, data=ABS2.arg)
 boxplot(ArgValue ~ RoleCond, data=ABS2.arg)
+describe.by(ABS2.arg$ArgValue, ABS2.arg$RoleCond)
 
 #Does ArgValue predict ...
 # sv5
-summary(lm(sv5 ~ ArgValue + RoleCond, data=ABS2.arg))
+summary(lm(sv5 ~ ArgValue, data=ABS2.arg))
 # sv5 with time controls
 summary(lm(sv5 ~ ArgValue + RoleCond + log(OtherTime) + log(ArgTime), data=ABS2.arg))  
 # RP
@@ -213,12 +214,19 @@ bm.bootstrapmed(ABS2$ArgValue, ABS2$IssWValue, ABS2$sv5)
 summary(lm(sv5~ArgValue + SalValue + IssWValue, data=ABS2))
 
 #Does Arg Typicality predict ...
+t.test(ArgTyp ~ RoleCond, data=ABS2.arg)
+describe.by(ABS2.arg$ArgTyp, ABS2.arg$RoleCond)
+
 summary(lm(sv5 ~ ArgTyp*RoleCond, data=ABS2))
+summary(lm(RP ~ ArgTyp*RoleCond, data=ABS2))
+summary(lm( ~ ArgTyp*RoleCond, data=ABS2))
 
 lm.b <- lm(sv5 ~ ArgTyp, data=ABS2.arg[ABS2.arg$RoleCond=="Buyer",])
 summary(lm.b)
 lm.s <- lm(sv5 ~ ArgTyp, data=ABS2.arg[ABS2.arg$RoleCond=="Seller",])
 summary(lm.s)
+bm.bootstrapmed(ABS2.arg$RoleCond, ABS2.arg$ArgTyp, ABS2.arg$sv5)
+
 
 ggplot(ABS2.arg, aes(ArgTyp,sv5)) +
 geom_point(aes(color=RoleCond)) +
