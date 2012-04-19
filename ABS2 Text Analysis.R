@@ -41,7 +41,14 @@ wordFreq <- function(vec,likelihood=TRUE){
 #function to compare word frequency between two sets
 freqDiff <- function(x,y, by="word", minFreq = 0){
   df             <- merge(x,y,all.x=T, all.y=T,by=by)
-  names(df)      <- c("word","freqX","likelihoodX","freqY","likelihoodY")
+  if(ncol(df)==3){
+    names(df) <- c(by,"freqX","freqY")
+  } else if(ncol(df)==5) {
+    names(df) <- c(by,"freqX","likelihoodX","freqY","likelihoodY")  
+  } else {
+    stop("Wrong number of columns")    
+  }
+
   df[is.na(df)]  <- 0
   df$freqDiff    <- df$freqX-df$freqY
   df$freqSum     <- df$freqX + df$freqY
@@ -79,7 +86,7 @@ topicValueSum <- function(arg,wvm=wordValueMap){
 
 #function to compute the typicality of a argument for its role
 argTypicality <- function(arg,wf.Arg.role){
-  wf.Arg <- wordFreq(arg,likelihood=FALSE)
+  wf.Arg <- wordFreq(arg)
   argTyp <- merge(wf.Arg, wf.Arg.role[c("word","likelihood")], by="word",all.x=T,all.y=T)
   argTyp[is.na(argTyp)]<-0
   names(argTyp) <- c("word","observed","expected")
