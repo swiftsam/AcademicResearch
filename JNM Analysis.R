@@ -11,7 +11,7 @@ jnm$OfferCount <- jnm$OfferCount - 1                #adjust the values of OfferC
 jnm$SatisfactionDelta <- jnm$SatisfactionDelta - 4  #adjust the values of Satisfaction Delta since 4 = no change and lower numbers are negative
 jnm$Negotiate <- factor(jnm$Negotiate, levels = c(2,1),labels=c("Did Not Negotiate","Negotiated"))
 summary(jnm)
-describe.by(jnm,group=Negotiate)
+describe.by(jnm,group=jnm$Negotiate)
 
 
 attach(jnm)
