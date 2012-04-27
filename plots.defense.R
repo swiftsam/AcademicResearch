@@ -1,15 +1,28 @@
 library(sciplot)
 library(ggplot2)
 
+barVals <- function(df,factors,var){
+  ddply(df, factors, function(df)
+    return(c(mean=mean(df[,var],na.rm=T), se=sd(df[,var],na.rm=T)/sqrt(nrow(df)))))
+}
+
+limits  <- aes(ymax = mean+se, ymin=mean-se) 
+dodge   <- position_dodge(width=0.9)
+
 ##############################
 #Study 4, ABS2
 ##############################
 source("ABS2 Analysis.R")
 
-abs2sv5 <- ggplot(ABS2, aes(sv5,fill=RoleCond)) + geom_density(alpha=.5)
-abs2rp <- ggplot(ABS2, aes(RP,fill=c(ArgCond, RoleCond))) + geom_density(alpha=.5, position="dodge")
+sv5_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"sv5")
+ggplot(data=sv5_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
+  geom_bar(position="dodge", stat="identity") + 
+  geom_errorbar(limits, position=dodge, width=0.1) 
 
-bargraph.CI(ArgCond,sv5,group=RoleCond, data=ABS2, legend=T, ylab="Subjective Valuation of Car (5 item, Z-score)",main="Study 4: Role x Condition on Subjective Value of Car")
-bargraph.CI(ArgCond,RP,group=RoleCond,data=ABS2, ylim=c(2000,2500), legend=T, ylab="Reservation Price ($)", main="Study 4: Role x Condition on Reservation Price")
 
-
+rp_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"RP")
+ggplot(data=rp_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
+  scale_y_continuous(limits=c(2000,2500)) +
+  geom_bar(position="dodge", stat="identity") + 
+  geom_errorbar(limits, position=dodge, width=0.1) +
+  theme_bw()
