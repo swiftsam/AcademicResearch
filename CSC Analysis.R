@@ -238,7 +238,9 @@ summary(lm(GlobSatZ~ctCoached+ctSelfOther+ctOwnType+ctOtherType+ctNoneFree))
 ####Global Satisfaction Post Response####
 GlobSatPost.aov <- aov(GlobSatPostZ~ArgCond,data=csc)
 summary(GlobSatPost.aov)
-bargraph.CI(ArgCond,GlobSatPostZ,ylab="Satisfaction", xlab="Condition",main="Global Satisfaction After Response")
+if(outputPlots){
+  bargraph.CI(ArgCond,GlobSatPostZ,ylab="Satisfaction", xlab="Condition",main="Global Satisfaction After Response")
+}
 TukeyHSD(GlobSatPost.aov)
 GlobSatPost.factoraov <-aov(GlobSatPostZ~ArgType*ArgTarget, data=csc)
 summary(GlobSatPost.factoraov)
@@ -272,7 +274,9 @@ if(outputPlots){
 #Change in GlobSat
 GlobSatZDelta.aov <- aov(GlobSatZDelta~ArgCond,data=csc)
 summary(GlobSatZDelta.aov)
-lineplot.CI(ArgCond,GlobSatZDelta,ylab="Change in Global Satisfaction", xlab="Condition", main="Change in Global Satisfaction after Response")
+if(outputPlots){
+  lineplot.CI(ArgCond,GlobSatZDelta,ylab="Change in Global Satisfaction", xlab="Condition", main="Change in Global Satisfaction after Response")  
+}
 TukeyHSD(GlobSatZDelta.aov)
 pairwise.t.test(GlobSatZDelta,ArgCond,pool.SD="F")
 GlobSatZDelta.factoraov <-aov(GlobSatZDelta~ArgType*ArgTarget, data=csc)

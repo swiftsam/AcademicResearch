@@ -1,3 +1,5 @@
+outputPlots <- FALSE
+
 #libraries
 library(Hmisc)    #for rcorr()
 library(sciplot)  #for bargraph.CI()
@@ -29,20 +31,17 @@ rcorr(cbind(Satisfaction,PersuasiveSelf))
 rcorr(cbind(SatisfactionDelta,PersuasiveSelf))
 
 #Graphs
-setwd("~/Desktop")
-png('jnm-OfferCount.png', width=450, height=400)
-bargraph.CI(Negotiate,
-            OfferCount,
-            ylim=c(0,3),
-            col=c("darkgoldenrod2","lightblue4"),
-            xlab="Choice to Negotiate",
-            ylab="Number of Offers",
-            main="Number of Offers",
-            cex.main=2,
-            cex.lab=1.5)
-dev.off()
+if(outputPlots){
+  bargraph.CI(Negotiate,
+              OfferCount,
+              ylim=c(0,3),
+              col=c("darkgoldenrod2","lightblue4"),
+              xlab="Choice to Negotiate",
+              ylab="Number of Offers",
+              main="Number of Offers",
+              cex.main=2,
+              cex.lab=1.5)
 
-png('jnm-Percentile.png', width=450, height=400)
 bargraph.CI(Negotiate,
             Percentile,
             ylim=c(0,100),
@@ -52,9 +51,7 @@ bargraph.CI(Negotiate,
             main="Offer Percentile",
             cex.main=2,
             cex.lab=1.5)
-dev.off()
 
-png('jnm-Satisfaction.png', width=450, height=400)
 bargraph.CI(Negotiate,
             Satisfaction, 
             ylim=c(1,7),            
@@ -64,9 +61,7 @@ bargraph.CI(Negotiate,
             main="Satisfaction with Outcome",
             cex.main=2,
             cex.lab=1.5)
-dev.off()
 
-png('jnm-SatisfactionDelta.png', width=450, height=400)
 bargraph.CI(Negotiate,
             SatisfactionDelta,
             ylim=c(-.5,1.5),
@@ -76,6 +71,5 @@ bargraph.CI(Negotiate,
             main="Change in Satisfaction\nfrom Received to Accepted",
             cex.main=2,
             cex.lab=1.5)
-dev.off()
-
+}
 
