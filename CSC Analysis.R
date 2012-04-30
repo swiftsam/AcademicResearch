@@ -255,7 +255,7 @@ t.test(csc[ArgCond=="None","RespZ"],csc[ArgCond=="OtherBatna","RespZ"])
 
 Resp.ctValueBatna <- aov(RespZ~ctValueBatna, data=csc)
 summary(Resp.ctValueBatna)
-bargraph.CI(ArgCond,RespZ, col=c("darkolivegreen3","grey","darkgoldenrod2","grey","darkgoldenrod2","grey"), ylab="Satisfaction", xlab="Condition",main="Global Satisfaction After Sending Argument\nNone:Own Contrast")
+bargraph.CI(ArgCond,RespZ, ylab="Satisfaction", xlab="Condition",main="Reaction to Concession")
 
         
 #Change in GlobSat
