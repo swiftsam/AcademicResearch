@@ -2,6 +2,8 @@ library(plyr)
 library(tm)
 library(ggplot2)
 
+outputPlots <- FALSE
+
 #ABS Text analysis
 
 ####### ---------------------------------
@@ -234,6 +236,8 @@ tfDiff.BS.IssW <- merge(tfDiff.BS.IssW,ratings[c("mean","code")],by.x="topic",by
 #######  Plots
 ####### ---------------------------------
 
+if(outputPlots){
+  
 #Relative Word Freq in Argument
 ggplot(wfDiff.BS.Arg, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
   geom_bar(aes(fill=as.numeric(rating))) + 
@@ -292,3 +296,4 @@ ggplot(tfDiff.BS.IssW, aes(reorder(factor(topic),relFreqDiff),relFreqDiff)) +
   xlab("Topics") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
   opts(title="Relative Topic use in 'Most Important Attributes' by Role")
+}

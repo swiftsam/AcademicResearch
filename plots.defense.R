@@ -55,6 +55,8 @@ ggplot(data=csc.sat_sum, aes(y=mean, x=ArgCond,fill=ArgCond)) +
 #Study 3, SUN
 ##############################
 
+
+
 ##############################
 #Study 4, ABS2
 ##############################
@@ -91,13 +93,12 @@ ggplot(data=resreact_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) +
   theme_black_presentation()
 
 ggplot(wfDiff.BS.Arg, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
-  geom_bar(aes(fill=as.numeric(rating),10)) + 
+  geom_bar(aes(fill=as.numeric(rating))) + 
   scale_fill_gradient2(low="#A50026",mid="#FFFFBF",high="#006837", name="Rated Value", limits=c(-1.5,1.5)) +
   coord_flip() +
   scale_y_continuous() +
   xlab("Words") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
-  opts(title="Relative word use in Argument by Role")+
   theme_black_presentation()
 
 ggplot(wfDiff.BS.Sal, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
@@ -107,6 +108,15 @@ ggplot(wfDiff.BS.Sal, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) +
   scale_y_continuous() +
   xlab("Words") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
-  opts(title="Relative word use in 'Most Memorable Details' by Role")+
+  theme_black_presentation()
+
+#Relative Topic Freq in Argument
+ggplot(tfDiff.BS.Arg, aes(reorder(factor(topic),relFreqDiff),relFreqDiff)) + 
+  geom_bar(aes(fill=as.numeric(mean))) +
+  scale_fill_gradient2(low="#A50026",mid="#FFFFBF",high="#006837", name="Rated Value", limits=c(-1.5,1.5)) +
+  coord_flip() +
+  scale_y_continuous() +
+  xlab("Topics Used") +
+  ylab("Relative use by Sellers(-) & Buyers(+)") +
   theme_black_presentation()
 

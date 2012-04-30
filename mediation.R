@@ -41,7 +41,7 @@ bm.med<-function(x,med,y) {
 ## Requires bm.med()
 ## Includes a bias correction, but no acceleration
 
-bm.bootstrapmed<-function(x,med,y,iterations=1000,alpha=.05) {
+bm.bootstrapmed<-function(x,med,y,iterations=1000,alpha=.05,outputPlots=FALSE) {
   as.data.frame(cbind(x,med,y))->vars;
   length(x)->N;
   bootab<-vector()
@@ -51,7 +51,9 @@ bm.bootstrapmed<-function(x,med,y,iterations=1000,alpha=.05) {
     lm(vars[sampnums,3]~vars[sampnums,2]+vars[sampnums,1])$coefficients[2]->iterb;
     (append(bootab,itera*iterb))->bootab
   }
-  hist(bootab,main=paste("Bootsrapped a*b, with",iterations,"iterations"),col="red");
+  if(ouputPlots){
+    hist(bootab,main=paste("Bootsrapped a*b, with",iterations,"iterations"),col="red");
+  }
   bm.med(x,med,y)[1,5]->ab
   # Bias correction after Stine (1989)
   sum(bootab<=ab)/iterations->prob
