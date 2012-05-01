@@ -1,8 +1,10 @@
 #libraries
 library(psych)
+library(irr)
 
 #import data
 sun.i <- read.csv("http://swift.cbdr.cmu.edu/data/SUN-data-indiv-2011-01-30.csv")
+sun.coded.free <-read.csv("http://swift.cbdr.cmu.edu/data/SUN-coded-freecond-arg-type-2012-04-28.csv")
 attach(sun.i)
 
 #clean data
@@ -28,13 +30,15 @@ rm(utilmeasures)
 
 sun.i$utility <- (sun.i$util.entertain.z + sun.i$util.useful.z + sun.i$util.valuable.z)/3
 
-#test for impasse ~ condition
-#FIXME needs to be done on dyad data
-#chisq.test(table(cond,deal))
 
-sun.i.arg <- subset(sun.i, cond != "control")
-sun.i.arg.b <- subset(sun.i.arg, role = "buyer")
+##coded argument types in the free argument condition
+sun.coded.free[is.na(sun.coded.free)] <- 0
+kappa2(sun.coded.free[c("Coder1","Coder2")])
+
+sun.coded.free$CoderAgreement <- rep(0,nrow(sun.coded.free))
+sun.coded.free[sun.coded.free$Coder1 == 1 & sun.coded.free$Coder2 == 1, "CoderAgreement"] <- 1
 
 
 
-summary(sun.i)
+
+
