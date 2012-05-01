@@ -25,11 +25,12 @@ ggplot(data=jnm.sat_sum, aes(fill=Negotiate, y=mean, x=Negotiate)) +
   geom_bar(position="dodge", stat="identity",color="grey70") + 
   geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
   scale_y_continuous(limits=c(1,7),oob=rescale_none) +
-  xlab("Choice to Negotiate") +
+  xlab("\nChoice to Negotiate") +
   ylab("Satisfaction with Offer") +
   scale_fill_manual(values = palette, name="Negotiate") +
   opts(legend.position = "none") +
   theme_black_presentation()
+ggsave(filename="~/Desktop/jnm.sat_sum.png", width=6, height=7)
 
 ##############################
 #Study 2, CSC
@@ -38,24 +39,39 @@ source("CSC Analysis.R")
 
 csc$ArgCond <- factor(csc$ArgCond, 
                       levels=c("None","Free","OwnLow","OtherHigh","OwnBatna","OtherBatna"), 
-                      labels=c("No Argument","Uncoached\nArgument","Own\nLow Value","Other\nHigh Value","Own\nBATNA Strong","Other\nBATNA Weak"))
+                      labels=c("No Argument","Uncoached\nArgument","Own Value\nLow","Other Value\nHigh","Own BATNA\nStrong","Other BATNA\nWeak"))
 csc.sat_sum <- barVals(csc,c("ArgCond"),"GlobSatZ")
 
 ggplot(data=csc.sat_sum, aes(y=mean, x=ArgCond,fill=ArgCond)) +
   geom_bar(position="dodge", stat="identity",color="grey70") + 
   geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
-  xlab("Argument Condition") +
+  xlab("\nArgument Condition") +
   ylab("Satisfaction (5 item, Z-score)") +
   scale_fill_manual(values = brewer.pal(6,name="Paired"), name="Condition") +
   opts(legend.position = "none") +
   theme_black_presentation()
+ggsave(filename="~/Desktop/csc.sat_sum.png", width=11, height=7)
 
 
 ##############################
 #Study 3, SUN
 ##############################
+source("SUN Analysis.R")
+sun.coded.free$ArgType <- factor(sun.coded.free$ArgType, 
+                      levels=c("OwnValueLow","OtherValueHigh","OwnBatnaStrong","OtherBatnaWeak"), 
+                      labels=c("Own Value\nLow","Other Value\nHigh","Own BATNA\nStrong","Other BATNA\nWeak"))
 
+sun.freq_sum <- ddply(sun.coded.free, c("ArgType","Role"), function(df)
+                  c(count=sum(df$CoderAgreement), percentage=sum(df$CoderAgreement)/nrow(df)))
 
+ggplot(data=sun.freq_sum, aes(y=percentage*100, x=ArgType,fill=Role)) +
+  geom_bar(position="dodge", stat="identity",color="grey70") + 
+  xlab("\nArgument Type") +
+  ylab("% Using Argument Type") +
+  scale_fill_manual(values = palette, name="Role") +
+  scale_y_continuous(limits=c(0,100),oob=rescale_none) +
+  theme_black_presentation()
+ggsave(filename="~/Desktop/sun.freq_sum.png", width=10, height=7)
 
 ##############################
 #Study 4, ABS2
