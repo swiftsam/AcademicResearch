@@ -3,6 +3,8 @@ library(ggplot2)
 library(sciplot)
 library(psych)
 
+outputPlots <- FALSE
+
 ####### ---------------------------------
 #######  Data Prep
 ####### ---------------------------------
@@ -86,22 +88,22 @@ lve$TimeScen <- lve$TimeIntro_3 + lve$TimeDesc_3 + lve$TimeTask_3
 #Did the samples differ in how long they looked at the book info?
 describe.by(lve$TimeDesc_3, lve$ArgCond)
 t.test(TimeDesc_3 ~ ArgCond, data=lve)
-qplot(ArgCond,TimeDesc_3,data=lve, geom="boxplot")
+if(outputPlots) { qplot(ArgCond,TimeDesc_3,data=lve, geom="boxplot") }
 
 #Did the samples differ in how many clicks on the book info?
 describe.by(lve$TimeDesc_4, lve$ArgCond)
 t.test(TimeDesc_4 ~ ArgCond, data=lve)
-qplot(ArgCond,TimeDesc_4,data=lve, geom="boxplot")
+if(outputPlots) {qplot(ArgCond,TimeDesc_4,data=lve, geom="boxplot") }
 
 #Did the samples differ int terms of time spent reading materials?
 describe.by(lve$TimeScen, lve$ArgCond)
 t.test(log(TimeScen)~ ArgCond, data=lve)
-qplot(ArgCond,TimeScen,data=lve, geom="boxplot")
+if(outputPlots) {qplot(ArgCond,TimeScen,data=lve, geom="boxplot") }
 
 #Did the study take longer for one condition than the other?
 describe.by(lve$TotalTime, lve$ArgCond)
 t.test(log(TotalTime)~ ArgCond, data=lve)
-qplot(ArgCond,log(TotalTime),data=lve, geom="boxplot")
+if(outputPlots) {qplot(ArgCond,log(TotalTime),data=lve, geom="boxplot") }
 
 ####### ---------------------------------
 #######  Exclusion Criteria
@@ -178,6 +180,8 @@ lve$sv6 <- rowMeans(
     scale(lve$SUsoonread)
     ),
   na.rm=TRUE)
+#unstandardized version for more informative plots
+lve$sv6noZ <- rowMeans(lve[c("SUenter","SUsusp","SUkingrel","SUshare","SUexcite","SUsoonread")])
 
 
 ####### ---------------------------------
@@ -187,12 +191,12 @@ lve$sv6 <- rowMeans(
 #Does subjective value of the book vary by condition?
 t.test(sv6 ~ ArgCond, data=lve)
 bargraph.CI(ArgCond,sv6,data=lve)
-qplot(ArgCond,sv6,data=lve,geom="boxplot",ylab="Subjective Value of Book (6 item, Z score)")
+if(outputPlots) { qplot(ArgCond,sv6,data=lve,geom="boxplot",ylab="Subjective Value of Book (6 item, Z score)") }
 
 #Did perception of the user review vary by condition?
 t.test(PercStars_1 ~ ArgCond, data=lve)
 bargraph.CI(ArgCond,PercStars_1, data=lve, ylim=c(1,5))
-qplot(ArgCond,PercStars_1,data=lve,geom=c("boxplot","jitter"),ylim=c(1,5),ylab="Perception of mean user review")
+if(outputPlots) { qplot(ArgCond,PercStars_1,data=lve,geom=c("boxplot","jitter"),ylim=c(1,5),ylab="Perception of mean user review") }
 
 #Did perception of the editorial review vary by condition?
 t.test(PercEdRev ~ ArgCond, data=lve)
@@ -206,7 +210,7 @@ summary(glm(bookReq ~ ArgCond + sv6 + log(TimeScen) + log(TotalTime), data=lve))
 #Does the number of requests for the book vary by condition?
 lm.nVisits <- lm(nVisits ~ ArgCond + sv6 + log(TotalTime), data=lve)
 lm.nVisitsLog <- lm(log(nVisits+1) ~ ArgCond + sv6 + log(TotalTime), data=lve)
-plot(lm.nVisits)
+if(outputPlots) { plot(lm.nVisits) }
 
 
 
@@ -221,24 +225,24 @@ requesters <- subset(lve, bookReq==1)
 #Does subjective value of the book vary by condition?
 t.test(sv6 ~ ArgCond, data=requesters)
 bargraph.CI(ArgCond,sv6,data=requesters)
-qplot(ArgCond,sv6,data=requesters,geom="boxplot",ylab="Subjective Value of Book (6 item, Z score)")
+if(outputPlots) {qplot(ArgCond,sv6,data=requesters,geom="boxplot",ylab="Subjective Value of Book (6 item, Z score)")}
 
 #Did perception of the user review vary by condition?
 t.test(PercStars_1 ~ ArgCond, data=requesters)
 bargraph.CI(ArgCond,PercStars_1, data=requesters, ylim=c(1,5))
-qplot(ArgCond,PercStars_1,data=requesters,geom=c("boxplot","jitter"),ylim=c(1,5),ylab="Perception of mean user review")
+if(outputPlots) {qplot(ArgCond,PercStars_1,data=requesters,geom=c("boxplot","jitter"),ylim=c(1,5),ylab="Perception of mean user review")}
 
 #Did perception of the editorial review vary by condition?
 t.test(PercEdRev ~ ArgCond, data=requesters)
 
 #Did the samples differ in how long they looked at the book info?
 t.test(TimeDesc_3 ~ ArgCond, data=requesters)
-qplot(ArgCond,TimeDesc_3,data=requesters, geom="boxplot")
+if(outputPlots) {qplot(ArgCond,TimeDesc_3,data=requesters, geom="boxplot")}
 
 #Did the samples differ in how many clicks on the book info?
 describe.by(requesters$TimeDesc_4, requesters$ArgCond)
 t.test(log(TimeDesc_4) ~ ArgCond, data=requesters)
-qplot(ArgCond,TimeDesc_4,data=requesters, geom="boxplot")
+if(outputPlots) {qplot(ArgCond,TimeDesc_4,data=requesters, geom="boxplot")}
 
 ####### ---------------------------------
 #######  Time 3 follow-up survey

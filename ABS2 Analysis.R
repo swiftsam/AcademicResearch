@@ -123,6 +123,7 @@ ABS2$sv5 <- rowMeans(
     scale(ABS2$SVExcite)
     ),
   na.rm=TRUE)
+ABS2$sv5noZ <- rowMeans(ASM[c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")])
 
 #Reaction to counterpart's response, 2 items
 alpha(ABS2[,c("ResSat","ResFair")])

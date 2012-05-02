@@ -157,6 +157,7 @@ ASM$sv5 <- rowMeans(
     scale(ASM$SVExcite)
     ),
   na.rm=TRUE)
+ASM$sv5noZ <- rowMeans(ASM[c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")])
 
 alpha(ASM[,c("ResSat","ResFair")])
 ASM$ResReact <- rowMeans(
