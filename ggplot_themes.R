@@ -22,7 +22,7 @@ theme_black_presentation <- function (base_size = 16){
     strip.text.x = theme_text(size = base_size * 0.8, colour = 'white'), 
     strip.text.y = theme_text(size = base_size * 0.8, colour = 'white', angle = -90), 
     plot.background = theme_rect(colour = 'black', fill = 'black'), 
-    plot.title = theme_text(size = base_size * 1.2),
+    plot.title = theme_text(size = base_size * 1.2, colour = 'white', vjust=1),
     plot.margin = unit(c(1, 1, 0.5, 0.5), "lines")
     ), class = "options")
 }
