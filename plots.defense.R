@@ -20,6 +20,18 @@ dodge   <- position_dodge(width=0.9)
 ##############################
 source("JNM Analysis.R")
 
+jnm.percentile_sum <- barVals(jnm, c("Negotiate"),"Percentile")
+ggplot(data=jnm.percentile_sum, aes(fill=Negotiate, y=mean, x=Negotiate)) + 
+  geom_bar(position="dodge", stat="identity",color="grey70") + 
+  geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
+  scale_y_continuous(limits=c(1,100),oob=rescale_none) +
+  xlab("\nChoice to Negotiate") +
+  ylab("Estimated Percentile of Offer Value") +
+  scale_fill_manual(values = palette, name="Negotiate") +
+  opts(legend.position = "none") +
+  theme_black_presentation()
+ggsave(filename="~/Desktop/jnm.percentile_sum.png", width=6, height=7)
+
 jnm.sat_sum <- barVals(jnm, c("Negotiate"),"Satisfaction")
 ggplot(data=jnm.sat_sum, aes(fill=Negotiate, y=mean, x=Negotiate)) + 
   geom_bar(position="dodge", stat="identity",color="grey70") + 
@@ -160,4 +172,59 @@ ggplot(tfDiff.BS.Arg, aes(reorder(factor(topic),relFreqDiff),relFreqDiff)) +
   xlab("Topics Used") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
   theme_black_presentation()
+
+##############################
+#Study 5, LVE
+##############################
+source("LVE Analysis.R")
+
+lve$ArgCond <- factor(lve$ArgCond, levels=c("NoArg","Arg"), labels=c("No Argument","Argument"))
+
+lve.sv6_sum <- barVals(lve, c("ArgCond"),"sv6noZ")
+ggplot(data=lve.sv6_sum, aes(fill=ArgCond, y=mean, x=ArgCond)) + 
+  geom_bar(position="dodge", stat="identity",color="grey70") + 
+  geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
+  scale_y_continuous(limits=c(1,7),oob=rescale_none) +
+  xlab("\nArgument Condition") +
+  ylab("Subjective Value (6 items)") +
+  scale_fill_manual(values = palette, name="Argument") +
+  opts(legend.position = "none", title="Subjective Value of Book") +
+  theme_black_presentation()
+ggsave(filename="~/Desktop/lve.sv6_sum.png", width=5, height=7)
+
+lve.req_sum <- ddply(lve, c("ArgCond"), function(df)
+  c(count=sum(df$bookReq), percentage=sum(df$bookReq)/nrow(df)))
+
+ggplot(data=lve.req_sum, aes(y=percentage*100, x=ArgCond,fill=ArgCond)) +
+  geom_bar(position="dodge", stat="identity",color="grey70") + 
+  xlab("\nArgument Condition") +
+  ylab("% Requesting Book") +
+  scale_fill_manual(values = palette, name="ArgCond") +
+  scale_y_continuous(limits=c(0,100),oob=rescale_none) +
+  opts(legend.position = "none", title="Liklihood of Requesting Book") +
+  theme_black_presentation()
+ggsave(filename="~/Desktop/lve.freq_sum.png", width=5, height=7)
+
+##############################
+#Study 6, ASM
+##############################
+source("ASM Analysis.R")
+
+
+ASM$ArgCond <- factor(ASM$ArgCond, 
+                      levels=c("NoArg","ArgExp","Arg"), 
+                      labels=c("No Argument","Argument\nExposure","Argument\nSelection"))
+asm.sv5_sum <- barVals(ASM,c("ArgCond"),"sv5noZ")
+
+ggplot(data=asm.sv5_sum, aes(y=mean, x=ArgCond,fill=ArgCond)) +
+  geom_bar(position="dodge", stat="identity",color="grey70") + 
+  geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
+  xlab("\nArgument Condition") +
+  ylab("Subjective Value (5 item, Z-score)") +
+  scale_fill_manual(values = palette, name="ArgCond") +
+  scale_y_continuous(limits=c(1,7),oob=rescale_none) +
+  opts(legend.position = "none") +
+  theme_black_presentation()
+ggsave(filename="~/Desktop/csc.sat_sum.png", width=11, height=7)
+
 
