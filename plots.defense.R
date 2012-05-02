@@ -92,7 +92,7 @@ source("ABS2 Analysis.R")
 
 ABS2$ArgCond <- factor(ABS2$ArgCond, levels=c("NoArg","Arg"), labels=c("No Argument","Argument"))
 
-abs2.sv5_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"sv5")
+abs2.sv5_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"sv5noZ")
 ggplot(data=abs2.sv5_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
   geom_bar(position="dodge", stat="identity",color="grey70") + 
   geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
@@ -122,6 +122,18 @@ ggplot(data=abs2.resreact_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) +
   scale_fill_manual(values = palette, name="Role") +
   theme_black_presentation()
 ggsave(filename="~/Desktop/abs2.resreact_sum.png", width=10, height=7)
+
+abs2.reject_sum <- ddply(ABS2, c("RoleCond","ArgCond"), function(df)
+  c(count=sum(df$ResRejectInt,na.rm=T), percentage=sum(df$ResRejectInt,na.rm=T)/nrow(df)))
+
+ggplot(data=abs2.reject_sum, aes(y=(1-percentage)*100, x=ArgCond,fill=RoleCond)) +
+  geom_bar(position="dodge", stat="identity",color="grey70") + 
+  xlab("\nArgument Condition") +
+  ylab("% Accepting Counter-Offer") +
+  scale_fill_manual(values = palette, name="Role") +
+  scale_y_continuous(limits=c(0,100),oob=rescale_none) +
+  theme_black_presentation()
+ggsave(filename="~/Desktop/abs2.accept_sum.png", width=10, height=7)
 
 #Relative Word Freq in Argument - no color
 ggplot(wfDiff.BS.Arg, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
@@ -201,7 +213,7 @@ ggplot(data=lve.req_sum, aes(y=percentage*100, x=ArgCond,fill=ArgCond)) +
   ylab("% Requesting Book") +
   scale_fill_manual(values = palette, name="ArgCond") +
   scale_y_continuous(limits=c(0,100),oob=rescale_none) +
-  opts(legend.position = "none", title="Liklihood of Requesting Book") +
+  opts(legend.position = "none", title="Likelihood of Requesting Book") +
   theme_black_presentation()
 ggsave(filename="~/Desktop/lve.freq_sum.png", width=5, height=7)
 
@@ -220,11 +232,11 @@ ggplot(data=asm.sv5_sum, aes(y=mean, x=ArgCond,fill=ArgCond)) +
   geom_bar(position="dodge", stat="identity",color="grey70") + 
   geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
   xlab("\nArgument Condition") +
-  ylab("Subjective Value (5 item, Z-score)") +
+  ylab("Subjective Value (5 item, mean)") +
   scale_fill_manual(values = palette, name="ArgCond") +
   scale_y_continuous(limits=c(1,7),oob=rescale_none) +
   opts(legend.position = "none") +
   theme_black_presentation()
-ggsave(filename="~/Desktop/csc.sat_sum.png", width=11, height=7)
+ggsave(filename="~/Desktop/asm.sat_sum.png", width=9, height=7)
 
 

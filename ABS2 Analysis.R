@@ -123,7 +123,7 @@ ABS2$sv5 <- rowMeans(
     scale(ABS2$SVExcite)
     ),
   na.rm=TRUE)
-ABS2$sv5noZ <- rowMeans(ASM[c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")])
+ABS2$sv5noZ <- rowMeans(ABS2[c("SVAttr","SVFav","SVShowoff","SVWant","SVExcite")])
 
 #Reaction to counterpart's response, 2 items
 alpha(ABS2[,c("ResSat","ResFair")])
@@ -165,7 +165,8 @@ table(ABS2$ArgCond, ABS2$ResAccept)
 chisq.test(ABS2$ArgCond, ABS2$ResAccept)
 
 table(ABS2$ArgCond, ABS2$ResAccept, ABS2$RoleCond)
-summary(glm(as.integer(ResAccept)-1 ~ ArgCond*RoleCond, data=ABS2))
+ABS2$ResRejectInt <- as.integer(ABS2$ResAccept)-1
+summary(glm(ResRejectInt ~ ArgCond*RoleCond, data=ABS2))
 
 
 #Does reaction to the offer vary by condition?
