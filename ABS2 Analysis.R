@@ -14,7 +14,7 @@ outputPlots <- FALSE
 ABS2 <- read.csv("http://swift.cbdr.cmu.edu/data/ABS2-data-2012-02-24.csv", stringsAsFactors=F)
 
 #data prep
-source("ABS2 Data Prep.R")
+source("ABS2 Data Prep.R", echo=T)
 
 ####### ---------------------------------
 #######  Calculated Variables

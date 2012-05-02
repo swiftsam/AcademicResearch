@@ -16,7 +16,7 @@ outputPlots <- FALSE
 #table(ABS2$RoleCond)
 
 #load SVA analyses for rated word value
-source("SVA Analysis.R")
+source("SVA Analysis.R", echo=T)
 
 ####### ---------------------------------
 #######  Functions

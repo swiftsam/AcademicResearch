@@ -20,13 +20,13 @@ sva <- rename(sva, c("V6"="IP","V8"="StartTime","V9"="EndTime","X186k_miles"="18
 #add simple IDs for each record
 sva$ID <- factor(c(1:nrow(sva)))
 
-ratings <- as.data.frame(t(sapply(sva[4:27],describe)))
-ratings$mean <- as.numeric(ratings$mean)
+ratings <- as.data.frame(sapply(sva[4:27],mean))
+names(ratings) <- c("mean")
 ratings$code <- rownames(ratings)
 
 #combine summer_tires and winter_tires into seasonal_tires
 M_seasonsal_tires <- mean(c(ratings[["summer_tires","mean"]],ratings[["winter_tires","mean"]]))
-ratings[nrow(ratings)+1,] <- c(1,30,M_seasonsal_tires,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"seasonal_tires")
+ratings[nrow(ratings)+1,] <- c(M_seasonsal_tires,"seasonal_tires")
 
 #load text mapping table
 sva.tmap <- read.csv("http://swift.cbdr.cmu.edu/data/SVA-text-mapping-2012-04-03.csv",stringsAsFactors=F)
