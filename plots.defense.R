@@ -80,49 +80,74 @@ source("ABS2 Analysis.R")
 
 ABS2$ArgCond <- factor(ABS2$ArgCond, levels=c("NoArg","Arg"), labels=c("No Argument","Argument"))
 
-sv5_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"sv5")
-ggplot(data=sv5_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
+abs2.sv5_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"sv5")
+ggplot(data=abs2.sv5_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
   geom_bar(position="dodge", stat="identity",color="grey70") + 
   geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
-  xlab("Argument Condition") +
+  xlab("\nArgument Condition") +
   ylab("Subjective Value (5-item, Z-score)") +
   scale_fill_manual(values = palette, name="Role") +
   theme_black_presentation()
+ggsave(filename="~/Desktop/abs2.sv5_sum.png", width=10, height=7)
 
-rp_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"RP")
-ggplot(data=rp_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
+abs2.rp_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"RP")
+ggplot(data=abs2.rp_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
   geom_bar(position="dodge", stat="identity",color="grey70") +
   geom_errorbar(limits, position=dodge, width=0.1,size=.75, col="white") +
   scale_y_continuous(limits=c(2000,2500),oob=rescale_none) +
-  xlab("Argument Condition") +
+  xlab("\nArgument Condition") +
   ylab("Reservation Price ($)") +
   scale_fill_manual(values = palette, name="Role") +
   theme_black_presentation()
+ggsave(filename="~/Desktop/abs2.rp_sum.png", width=10, height=7)
 
-resreact_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"ResReact")
-ggplot(data=resreact_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
+abs2.resreact_sum <- barVals(ABS2, c("RoleCond", "ArgCond"),"ResReact")
+ggplot(data=abs2.resreact_sum, aes(fill=RoleCond, y=mean, x=ArgCond)) + 
   geom_bar(position="dodge", stat="identity",color="grey70") + 
   geom_errorbar(limits, position=dodge, width=0.1, size=.75, col="white") +
-  xlab("Argument Condition") +
+  xlab("\nArgument Condition") +
   ylab("Reaction to Response (3-item, Z-score)") +
   scale_fill_manual(values = palette, name="Role") +
   theme_black_presentation()
+ggsave(filename="~/Desktop/abs2.resreact_sum.png", width=10, height=7)
 
+#Relative Word Freq in Argument - no color
+ggplot(wfDiff.BS.Arg, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
+  geom_bar(aes(fill=as.numeric(rating))) + 
+  scale_fill_gradient2(low="grey50",mid="grey50",high="grey50", na.value="grey50", name="Rated Value", limits=c(-1.5,1.5)) +
+  coord_flip() +
+  scale_y_continuous() +
+  xlab("Words Used") +
+  ylab("Relative use by Sellers(-) & Buyers(+)") +
+  theme_black_presentation()
+
+#Relative Word Freq in Argument
 ggplot(wfDiff.BS.Arg, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
   geom_bar(aes(fill=as.numeric(rating))) + 
   scale_fill_gradient2(low="#A50026",mid="#FFFFBF",high="#006837", name="Rated Value", limits=c(-1.5,1.5)) +
   coord_flip() +
   scale_y_continuous() +
-  xlab("Words") +
+  xlab("Words Used") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
   theme_black_presentation()
 
+#Relative Word Freq in Salience
 ggplot(wfDiff.BS.Sal, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
   geom_bar(aes(fill=as.numeric(rating))) +
   scale_fill_gradient2(low="#A50026",mid="#FFFFBF",high="#006837", name="Rated Value", limits=c(-1.5,1.5)) +
   coord_flip() +
   scale_y_continuous() +
-  xlab("Words") +
+  xlab("Words Used") +
+  ylab("Relative use by Sellers(-) & Buyers(+)") +
+  theme_black_presentation()
+
+#Relative Word Freq in Weight
+ggplot(wfDiff.BS.IssW, aes(reorder(factor(word),relFreqDiff),relFreqDiff)) + 
+  geom_bar(aes(fill=as.numeric(rating))) +
+  scale_fill_gradient2(low="#A50026",mid="#FFFFBF",high="#006837", name="Rated Value", limits=c(-1.5,1.5)) +
+  coord_flip() +
+  scale_y_continuous() +
+  xlab("Words Used") +
   ylab("Relative use by Sellers(-) & Buyers(+)") +
   theme_black_presentation()
 
