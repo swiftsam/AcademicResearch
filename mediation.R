@@ -51,7 +51,7 @@ bm.bootstrapmed<-function(x,med,y,iterations=1000,alpha=.05,outputPlots=FALSE) {
     lm(vars[sampnums,3]~vars[sampnums,2]+vars[sampnums,1])$coefficients[2]->iterb;
     (append(bootab,itera*iterb))->bootab
   }
-  if(ouputPlots){
+  if(outputPlots){
     hist(bootab,main=paste("Bootsrapped a*b, with",iterations,"iterations"),col="red");
   }
   bm.med(x,med,y)[1,5]->ab
