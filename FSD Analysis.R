@@ -7,8 +7,8 @@ if (!require("car")) install.packages("car")  #for recode()ing variables
 if (!require("xtable")) install.packages("xtable")  #for outputting tables
 
 #load data
-fsd <- read.csv("http://swift.cbdr.cmu.edu/data/FSD-data-2011-02-22.csv", header=TRUE, sep=",")
-#fsd <- read.csv("Desktop/analysis export 2011-02-22.csv", header=TRUE, sep=",")
+fsd <- read.csv("http://samswift.org/data/FSD-data-2011-02-22.csv", header=TRUE, sep=",")
+#fsd <- read.csv("FSD-data-2011-02-22.csv", header=TRUE, sep=",")
 attach(fsd)
 
 #shape data
@@ -42,6 +42,7 @@ fsd$Interview_Z <- temp
 rm(temp)
 
 #Applicant-level correlations
+if (!require("Hmisc")) install.packages("Hmisc")
 library(Hmisc)
 appvars<-c("Gender","Age","USCitizen","GMAT","Interview_Z","WorkHistory","GPA")
 applicants <-fsd[appvars]
