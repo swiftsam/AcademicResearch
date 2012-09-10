@@ -108,7 +108,11 @@ describe(sqef$age)              # mean and sd of age
 table(sqef$gender)              # ratio of gender
 table(sqef$edu)                 # table of educational attainment
 length(unique(sqef$geo))        # number of US states represented
+table(sqef$src)                 # recruitment source
 
+# football fandom
+describe(sqef$fanLikert)    
+ggplot(data=sqef, aes(x=fanLikert, fill=src)) + geom_density(alpha=.5, adjust=1.4)
 
 ####### ---------------------------------
 #######  Hypothesis Tests
