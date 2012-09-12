@@ -46,7 +46,8 @@ sqef <- rename(sqef, c("pAFCeast_1"  = "pAE",
 sqef$id <- factor(c(1:nrow(sqef)))
 
 # make factors
-sqef$src <- factor(sqef$src, labels=c("rnfl"="reddit","mturk"="mturk"))
+sqef$src <- factor(sqef$src, levels=c("rnfl","mturk"),
+                   labels=c("reddit","mturk"))
 sqef$frameCond  <- factor(sqef$frameCond, 
                          labels=c("repeat as division champion" = "Status Quo",
                                   "lose their division champion title to another team" = "Change"))
@@ -76,7 +77,12 @@ sqef$start.time <- as.POSIXct(sqef$start.time)
 sqef$end.time   <- as.POSIXct(sqef$end.time)
 sqef$total.time <- -as.double(sqef$start.time - sqef$end.time) #number of seconds between start- and end- time
 
-# 
+#reversing probabilities of status quo for the change frame condition
+prob.cols <- c("pAE", "pAN", "pAS", "pAW", "pNE", "pNN", "pNS", "pNW")
+sqef[sqef$frameCond == "Change", prob.cols] <- 100 - sqef[sqef$frameCond == "Change", prob.cols]
+
+#mean probability assigned to 4 teams
+sqef$pMean <- rowMeans(sqef[prob.cols], na.rm=T)
 
 ####### ---------------------------------
 #######  Exclusion Criteria
@@ -111,13 +117,15 @@ length(unique(sqef$geo))        # number of US states represented
 table(sqef$src)                 # recruitment source
 
 # football fandom
-describe(sqef$fanLikert)    
 ggplot(data=sqef, aes(x=fanLikert, fill=src)) + geom_density(alpha=.5, adjust=1.4)
+ggplot(data=sqef, aes(x=fanNgames_1, fill=src)) + geom_density(alpha=.5)
 
 ####### ---------------------------------
 #######  Hypothesis Tests
 ####### ---------------------------------
 
-
+#status quo prob X 
+aov <- aov(pMean ~ sourceCond*frameCond, data=sqef)
+ggplot(data=sqef, aes(frameCond, pMean)) + geom_bar()
 
 
