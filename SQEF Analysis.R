@@ -10,6 +10,8 @@ library(sciplot)
 # load data
 sqef.a <- read.csv("http://samswift.org/data/SQEF-data-a-2012-09-07.csv", stringsAsFactors=F)
 sqef.b <- read.csv("http://samswift.org/data/SQEF-data-b-2012-09-07.csv", stringsAsFactors=F)
+nfl.hist <- read.csv("http://samswift.org/data/SQEF-nfl-division-winners-2002-2011.csv", stringsAsFactors=F)
+book.odds <- read.csv("http://samswift.org/data/SQEF-book-odds-2012-09-05.csv", stringsAsFactors=F)
 
 # combine datasets
 sqef.a <- rename(sqef.a, c("Q34"="Q38"))
@@ -30,6 +32,7 @@ sqef <- rename(sqef, c("V6"="ip",
                      "exp"="sourceCond",
                      "pAFCeast_1"="pAE",
                      "pAFCnorth_1"="pAN",
+                     "fanNgames_1" = "fanNgames",
                      "Q17"="comments",
                      "Q38"="contact"))
 
@@ -78,31 +81,52 @@ sqef$start.time <- as.POSIXct(sqef$start.time)
 sqef$end.time   <- as.POSIXct(sqef$end.time)
 sqef$total.time <- -as.double(sqef$start.time - sqef$end.time) #number of seconds between start- and end- time
 
-#reversing probabilities of status quo for the change frame condition
+# reversing probabilities of status quo for the change frame condition
 prob.cols <- c("pAE", "pAN", "pAS", "pAW", "pNE", "pNN", "pNS", "pNW")
 sqef[sqef$frameCond == "Change", prob.cols] <- 100 - sqef[sqef$frameCond == "Change", prob.cols]
 
-#mean probability assigned to 4 teams
+# number of forecasts made
+sqef$nFcasts <- rowSums(!is.na(sqef[prob.cols]))
+
+# mean probability assigned to 4 teams
 sqef$pMean <- rowMeans(sqef[prob.cols], na.rm=T)
+
+# log of number of games watched
+sqef$logfanNgames <- sqef$fanNgames
+sqef$logfanNgames <- log(sqef$logfanNgames)
+sqef$logfanNgames[sqef$logfanNgames==-Inf] <- 0
 
 ####### ---------------------------------
 #######  Exclusion Criteria
 ####### ---------------------------------
 
+total.n <- nrow(sqef)
+total.n.src <- table(sqef$src)
+
 # quit before the page with instructions
 length(sqef$id[is.na(sqef$intro)])
-sqef <- subset(sqef,!is.na(sqef$intro))
+
+# did not make all 4 forecasts
+length(sqef$id[sqef$nFcasts < 4])
+excl.incomplete <- length(sqef$id[sqef$nFcasts < 4])
 
 # time to complete study < 30 seconds
 qplot(sqef$total.time, geom="histogram") + xlim(30,500)
-length(sqef$id[sqef$total.time < 30])
-sqef <- subset(sqef,sqef$total.time > 30)
+excl.time <- length(sqef$id[sqef$total.time < 30])
 
-#duplicate ip address
+# duplicate ip address
 sqef <- sqef[order(sqef$start.time),]
 sqef$ip.dup <- duplicated(sqef$ip)
 length(sqef$id[sqef$ip.dup])
+excl.dup <- length(sqef$id[sqef$ip.dup])
+
+# subset based on exclusion rules
+sqef <- subset(sqef,!is.na(sqef$intro))
+sqef <- subset(sqef,sqef$nFcasts == 4)
+sqef <- subset(sqef,sqef$total.time > 30)
 sqef <- subset(sqef,!ip.dup)
+
+post.excl.n <- nrow(sqef)
 
 ####### ---------------------------------
 #######  Lottery Winner
@@ -121,25 +145,100 @@ sqef$yob    <- sqef$yob+1919    #values start at 1920=1
 sqef$age    <- 2012 - sqef$yob
 describe(sqef$age)              # mean and sd of age
 
-table(sqef$gender)              # ratio of gender
-table(sqef$edu)                 # table of educational attainment
+prop.table(table(sqef$gender))  # ratio of gender
+prop.table(table(sqef$edu))                 # table of educational attainment
 length(unique(sqef$geo))        # number of US states represented
 table(sqef$src)                 # recruitment source
 
 # football fandom
 ggplot(data=sqef, aes(x=fanLikert, fill=src)) + geom_density(alpha=.5, adjust=1.4)
-ggplot(data=sqef, aes(x=fanNgames_1, fill=src)) + geom_density(alpha=.5)
+ggplot(data=sqef, aes(x=fanNgames, fill=src)) + geom_density(alpha=.5)
+
+####### ---------------------------------
+#######  Composite measures
+####### ---------------------------------
+fan.measures <- sqef[c("logfanNgames","fanLikert", "src")]
+fan.measures$src <- as.numeric(fan.measures$src)
+alpha(fan.measures) 
+
+ggplot(sqef, aes(logfanNgames, fanLikert)) +
+  geom_jitter(aes(color=src)) +
+  geom_smooth(method="lm")
+
+####### ---------------------------------
+#######  Betting odds benchmark
+####### ---------------------------------
+book.probs       <- book.odds
+
+# convert decimal odds to implied probabilities
+book.probs[4:27] <- (1/book.odds[4:27]) * 100  
+
+# average across all 24 sports books
+book.probs$pMean <- rowMeans(book.probs[4:27])
+
+# keep and refshape the probabilities for the status quo teams
+book.probs.sq    <- subset(book.probs, champ.2011==1, 
+                           select=c(division, pMean))
+book.probs.sq    <- arrange(book.probs.sq, division)
+rownames(book.probs.sq) <- book.probs.sq$division
+book.probs.sq$division <- NULL
+book.probs.sq <- t(book.probs.sq)
+book.probs.sq <- matrix(book.probs.sq, nrow=nrow(sqef),ncol=ncol(book.probs.sq), byrow=T)
+
+# calculate individual deviation from book probabilities
+book.dev <- sqef[prob.cols] - book.probs.sq
+colnames(book.dev) <- paste("dev",prob.cols,sep="")
+book.dev$devMean <- rowMeans(book.dev, na.rm=T)
+sqef <- cbind(sqef,book.dev)
+
+####### ---------------------------------
+#######  Status-quo base rate in NFL since 2002
+####### ---------------------------------
+# format data.frame of division champs
+rownames(nfl.hist) <- nfl.hist$Season
+nfl.hist$Season <- NULL
+
+# create empty logical matrix of repeat winners
+nfl.sq <- matrix(nrow=nrow(nfl.hist),
+                 ncol=ncol(nfl.hist),
+                 dimnames=list(rownames(nfl.hist), colnames(nfl.hist)))
+
+# for each cell, test if it is equal to the same division a year earlier
+for(div in colnames(nfl.hist)){
+  for(year in rownames(nfl.hist)){
+    nfl.sq[year,div] <- nfl.hist[year,div] == nfl.hist[as.character(as.integer(year)-1),div]
+  } 
+}
+
+# tally the results
+prop.sq <- prop.table(table(nfl.sq))["TRUE"]
 
 ####### ---------------------------------
 #######  Hypothesis Tests
 ####### ---------------------------------
 
-#status quo prob X 
-aov <- aov(pMean ~ sourceCond*frameCond, data=sqef)
+# do source and frame manipulations predict status quo forecasts?
+aov.sq <- aov(pMean ~ sourceCond*frameCond + src, data=sqef)
+summary(aov.sq)
+
 bargraph.CI(data=sqef, x.factor=frameCond, response=pMean, group=sourceCond, 
             legend=T, ylim=c(0,100), 
             ylab="Probability of Status Quo", xlab="Framing Condition")
 
+# do source and frame manipulations predict devation from book odds of status quo?
+aov.dev <- aov(devMean ~ sourceCond*frameCond, data=sqef)
+summary(aov.dev)
+
+bargraph.CI(data=sqef, x.factor=frameCond, response=devMean, group=sourceCond, 
+            legend=T, 
+            ylab="Deviation from Book Status Quo", xlab="Framing Condition")
+
+# mean fcast per division
+colMeans(sqef[prob.cols], na.rm=T) - 
+head(book.probs.sq,n=1)
+
+#expertise and status quo endoresment
+summary(lm(pMean ~ src + fanNgames + frameCond + sourceCond, data=sqef))
 
 
 
