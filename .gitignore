@@ -3,3 +3,6 @@
 .RData
 *.csv
 *.*~
+*.html
+*.md
+figure
