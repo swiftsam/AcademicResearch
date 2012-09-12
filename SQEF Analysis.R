@@ -1,6 +1,7 @@
 library(plyr)
 library(psych)
 library(ggplot2)
+library(sciplot)
 
 ####### ---------------------------------
 #######  Data Prep
@@ -30,7 +31,7 @@ sqef <- rename(sqef, c("V6"="ip",
                      "pAFCeast_1"="pAE",
                      "pAFCnorth_1"="pAN",
                      "Q17"="comments",
-                     "Q39"="contact"))
+                     "Q38"="contact"))
 
 # rename probability judgment columns somethign shorter
 sqef <- rename(sqef, c("pAFCeast_1"  = "pAE",
@@ -101,7 +102,16 @@ sqef <- subset(sqef,sqef$total.time > 30)
 sqef <- sqef[order(sqef$start.time),]
 sqef$ip.dup <- duplicated(sqef$ip)
 length(sqef$id[sqef$ip.dup])
-sqef <- subset(sqef,!sqef$ip.dup)
+sqef <- subset(sqef,!ip.dup)
+
+####### ---------------------------------
+#######  Lottery Winner
+####### ---------------------------------
+
+#
+entrants <- subset(sqef, src=="reddit" & !is.na(contact))
+winner <- sample(rownames(entrants),1)
+entrants[winner,]
 
 ####### ---------------------------------
 #######  Sample Characteristics
@@ -126,6 +136,11 @@ ggplot(data=sqef, aes(x=fanNgames_1, fill=src)) + geom_density(alpha=.5)
 
 #status quo prob X 
 aov <- aov(pMean ~ sourceCond*frameCond, data=sqef)
-ggplot(data=sqef, aes(frameCond, pMean)) + geom_bar()
+bargraph.CI(data=sqef, x.factor=frameCond, response=pMean, group=sourceCond, 
+            legend=T, ylim=c(0,100), 
+            ylab="Probability of Status Quo", xlab="Framing Condition")
+
+
+
 
 
