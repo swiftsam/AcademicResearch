@@ -53,24 +53,27 @@ sqef$id <- factor(c(1:nrow(sqef)))
 sqef$src <- factor(sqef$src, levels=c("rnfl","mturk"),
                    labels=c("reddit","mturk"))
 sqef$frameCond  <- factor(sqef$frameCond, 
-                         labels=c("repeat as division champion" = "Status Quo",
-                                  "lose their division champion title to another team" = "Change"))
+                         levels=c("repeat as division champion", 
+                                  "lose their division champion title to another team"),
+                         labels=c("Status Quo","Change"))
 sqef$sourceCond <- factor(sqef$sourceCond,
-                          labels=c("by an NFL expert" = "Expert",
-                                   "randomly by a computer" = "Random"))
+                          levels=c("by an NFL expert",
+                                   "randomly by a computer"),
+                          labels=c("Expert","Random"))
 
-sqef$gender     <- factor(sqef$gender, 
-                          labels=c("1"="Male","2"="Female"))
+sqef$gender     <- factor(sqef$gender,
+                          levels=c(1,2),
+                          labels=c("Male","Female"))
 
-sqef$edu        <- factor(sqef$edu, ordered=TRUE,
-                          labels=c("1" = "< HS",
-                                   "2" = "HS",
-                                   "3" = "some college",
-                                   "4" = "2yr college",
-                                   "5" = "Bachelors",
-                                   "6" = "Masters",
-                                   "7" = "PhD",
-                                   "8" = "JD/MD"))
+sqef$edu        <- factor(sqef$edu, ordered=TRUE, levels=seq(1:8),
+                          labels=c("< HS",
+                                   "HS",
+                                   "some college",
+                                   "2yr college",
+                                   "Bachelors",
+                                   "Masters",
+                                   "PhD",
+                                   "JD/MD"))
 
 ####### ---------------------------------
 #######  Calculated Variables
@@ -132,10 +135,9 @@ post.excl.n <- nrow(sqef)
 #######  Lottery Winner
 ####### ---------------------------------
 
-#
-entrants <- subset(sqef, src=="reddit" & !is.na(contact))
-winner <- sample(rownames(entrants),1)
-entrants[winner,]
+# entrants <- subset(sqef, src=="reddit" & !is.na(contact))
+# winner <- sample(rownames(entrants),1)
+# entrants[winner,]
 
 ####### ---------------------------------
 #######  Sample Characteristics
@@ -146,7 +148,7 @@ sqef$age    <- 2012 - sqef$yob
 describe(sqef$age)              # mean and sd of age
 
 prop.table(table(sqef$gender))  # ratio of gender
-prop.table(table(sqef$edu))                 # table of educational attainment
+prop.table(table(sqef$edu))     # table of educational attainment
 length(unique(sqef$geo))        # number of US states represented
 table(sqef$src)                 # recruitment source
 
@@ -183,13 +185,16 @@ book.probs.sq    <- arrange(book.probs.sq, division)
 rownames(book.probs.sq) <- book.probs.sq$division
 book.probs.sq$division <- NULL
 book.probs.sq <- t(book.probs.sq)
-book.probs.sq <- matrix(book.probs.sq, nrow=nrow(sqef),ncol=ncol(book.probs.sq), byrow=T)
+book.probs.sq.mat <- matrix(book.probs.sq, nrow=nrow(sqef),ncol=ncol(book.probs.sq), byrow=T)
 
 # calculate individual deviation from book probabilities
-book.dev <- sqef[prob.cols] - book.probs.sq
+book.dev <- sqef[prob.cols] - book.probs.sq.mat
 colnames(book.dev) <- paste("dev",prob.cols,sep="")
 book.dev$devMean <- rowMeans(book.dev, na.rm=T)
 sqef <- cbind(sqef,book.dev)
+
+# check relationship between book odds and participant probs
+plot(book.probs.sq, colMeans(sqef[prob.cols], na.rm=T),xlim=c(0,100), ylim=c(0,100))
 
 ####### ---------------------------------
 #######  Status-quo base rate in NFL since 2002
@@ -218,9 +223,7 @@ prop.sq <- prop.table(table(nfl.sq))["TRUE"]
 ####### ---------------------------------
 
 # do source and frame manipulations predict status quo forecasts?
-aov.sq <- aov(pMean ~ sourceCond*frameCond + src, data=sqef)
-summary(aov.sq)
-
+summary(aov(pMean ~ sourceCond*frameCond, data=sqef))
 bargraph.CI(data=sqef, x.factor=frameCond, response=pMean, group=sourceCond, 
             legend=T, ylim=c(0,100), 
             ylab="Probability of Status Quo", xlab="Framing Condition")

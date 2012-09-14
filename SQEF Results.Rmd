@@ -25,7 +25,42 @@ Participants were excluded from the analysis if they exited the study before mak
 
 The final sample of `r post.excl.n` was `r round(prop.table(table(sqef$gender))["Male"],2)*100`% male.  Participants' mean age was `r round(describe(sqef$age)["mean"],2)` (SD= `r round(describe(sqef$age)["sd"],2)`), `r round(sum(prop.table(table(sqef$edu))[c("Bachelors","Masters","PhD","JD/MD")]),2)*100`% had at least a Bachelors degree, and participants currently lived in `r length(unique(sqef$geo))` US states.
 
-#### Fanhood
+### Methods
+Participants were asked to estimate the probability that each of 4 NFL teams who won their division last year would win again this year. Participants were randomly assigned to condition in a 2x2 design.
+
+* Question framing, "How likely is it that X will _______ "
+ * Status quo frame:  "repeat as division champion"
+ * Change frame: "lose their division champion title to another team"
+* Question source, "You will be asked to make predictions for 4 of the 8 Division Champions from last year.  These 4 teams were selected ________ for this survey."
+ * Expert: "by an NFL expert""
+ * Random: "randomly by a computer"
+ 
+All participants assigned probabilities to a random subset of 4 of the 8 teams.
+
+### Results
+
+#### DV: mean probability of status quo
+* Probabilities assigned by participants in the Change Frame condition were subtrated from 100 to convert to probability of the status quo.  
+* Mean probability (pMean) is the mean of the 4 probabilities elicited from the participant.
+```{r} 
+summary(aov(pMean ~ sourceCond*frameCond, data=sqef))
+```
+The main effect of question framing is highly significant, but the question source manipulation did not have a significant effect, and there is no significant interaction.
+
+```{r}
+bargraph.CI(data=sqef, x.factor=frameCond, response=pMean, group=sourceCond, 
+            legend=T, ylim=c(0,100), 
+            ylab="Probability of Status Quo", xlab="Framing Condition")
+```
+The main effect of question frame is in the predicted direction, with a status quo frame resulting in significantly higher forecasts of the status quo outcome.
+
+#### DV: deviation from betting lines' forecast of the status quo
+* The 8 forecasting problems are not objectively equivalent.  Some of the defending champion teams are more likely to repeat than others.  Mean forecast by participants varried across teams from `r round(min(colMeans(sqef[prob.cols],na.rm=T)),1)`% to `r round(max(colMeans(sqef[prob.cols],na.rm=T)),1)`%.  
+* Odds offered by online sports books at the time the study was run offer a benchmark forecast of the status quo for each division.  I collected odds from 24 popular sites from the day the study.  Status quo probabilities implied by the offered odds ranged from `r round(min(book.probs.sq),1)`% to `r round(max(book.probs.sq),1)`%.
+
+
+
+### Fanhood
 Fanhood was measured in three ways
 
 * Social comparison: Would you consider yourself more or less of a fan of the NFL than the average American? (7pt scale, from Much Less to Much More)
@@ -34,8 +69,6 @@ Fanhood was measured in three ways
 
 The three measures were highly related (standardized alpha = `r round(alpha(fan.measures)$total["std.alpha"],2)`).
 
-
-### Methods
 
 
 
