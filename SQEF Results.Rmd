@@ -2,15 +2,15 @@ SQEF (Status Quo Endorsement, Football) Results
 ========================================================
 
 ### Abstract
-Participants forecast the probability that last year's NFL division champions would repeat as champions this year.  Participants asked about the probability of the status quo persisting reported higher probabilities of the status quo compared to those who were asked about the probability of change.  There was no significant differnce in forecasts as a result of the specific items being described as selected by an NFL expert or randomly by an expert.
+Participants forecast the probability that last year's NFL division champions would repeat as champions this year.  Participants asked about the probability of the status quo persisting reported higher probabilities of the status quo compared to those who were asked about the probability of change.  There was no significant difference in forecasts as a result of the specific items being described as selected by an NFL expert or randomly by an expert.
 
 ### Intro
 
-SQEF tests two hypotheses concerning participants' forecasts of questions in which the outcomes correspond to either Status Quo or change.  Earlier observations suggest that participants under-forecat status quo options.  This study tests two explanations for that tendency:
+SQEF tests two hypotheses concerning participants' forecasts of questions in which the outcomes correspond to either Status Quo or change.  Earlier observations suggest that participants under-forecast status quo options.  This study tests two explanations for that tendency:
 
-1. Question framing leads responses.  We hypothesize that partcipants are more likely to forecast the status quo if the forecast asks about the status quo (e.g. "What is the probability that X will remain in power") than if it asks about the probability of a changed state (e.g. "What is the probability that X will fall out of power").
+1. Question framing leads responses.  We hypothesize that participants are more likely to forecast the status quo if the forecast asks about the status quo (e.g. "What is the probability that X will remain in power") than if it asks about the probability of a changed state (e.g. "What is the probability that X will fall out of power").
 
-2. Question selection implies change.  We hypothesize that a non-random selection of forecast problems conveys information about the liklihood of change in those situations.  It seems reasonable to infer that if an expert selected a specific item for forecasting, it may not be representative of the baserate distribution of change from the status quo across all such cases.
+2. Question selection implies change.  We hypothesize that a non-random selection of forecast problems conveys information about the likelihood of change in those situations.  It seems reasonable to infer that if an expert selected a specific item for forecasting, it may not be representative of the base rate distribution of change from the status quo across all such cases.
 
 We used the context of the NFL football season to test these two explanations of status quo forecasting behavior.
 
@@ -19,7 +19,7 @@ We used the context of the NFL football season to test these two explanations of
 source("SQEF Analysis.R")
 ```
 
-`r total.n` participants responded to soliciations posted on Amazon's mturk (n= `r total.n.src["mturk"]` ) and reddit.com's NFL fan community(n= `r total.n.src["reddit"]`).  Participants were recruited from both sites to ensure that we sampled sufficiently across the range of NFL fandom to enable expertise-related analyses.  All participants completed the study on September 5th, 2012, the day of the first NFL game of the 2012 season.
+`r total.n` participants responded to solicitations posted on Amazon's mturk (n= `r total.n.src["mturk"]` ) and reddit.com's NFL fan community(n= `r total.n.src["reddit"]`).  Participants were recruited from both sites to ensure that we sampled sufficiently across the range of NFL fandom to enable expertise-related analyses.  All participants completed the study on September 5th, 2012, the day of the first NFL game of the 2012 season.
 
 Participants were excluded from the analysis if they exited the study before making forecasts (n= `r excl.incomplete`), completed the entire study in fewer than 30 seconds (n= `r excl.time`), or may have been participating more than once as determined by duplicate IP addresses (n= `r excl.dup`).  Because these exclusion criteria were largely redundant, the final sample numbered `r post.excl.n`. 
 
@@ -40,7 +40,7 @@ All participants assigned probabilities to a random subset of 4 of the 8 teams.
 ### Results
 
 #### DV: mean probability of status quo
-* Probabilities assigned by participants in the Change Frame condition were subtrated from 100 to convert to probability of the status quo.  
+* Probabilities assigned by participants in the Change Frame condition were subtracted from 100 to convert to probability of the status quo.  
 * Mean probability (pMean) is the mean of the 4 probabilities elicited from the participant.
 ```{r} 
 summary(aov(pMean ~ sourceCond*frameCond, data=sqef))
@@ -55,19 +55,41 @@ bargraph.CI(data=sqef, x.factor=frameCond, response=pMean, group=sourceCond,
 The main effect of question frame is in the predicted direction, with a status quo frame resulting in significantly higher forecasts of the status quo outcome.
 
 #### DV: deviation from betting lines' forecast of the status quo
-* The 8 forecasting problems are not objectively equivalent.  Some of the defending champion teams are more likely to repeat than others.  Mean forecast by participants varried across teams from `r round(min(colMeans(sqef[prob.cols],na.rm=T)),1)`% to `r round(max(colMeans(sqef[prob.cols],na.rm=T)),1)`%.  
+* The 8 forecasting problems are not objectively equivalent.  Some of the defending champion teams are more likely to repeat than others.  Mean forecast by participants varied across teams from `r round(min(colMeans(sqef[prob.cols],na.rm=T)),1)`% to `r round(max(colMeans(sqef[prob.cols],na.rm=T)),1)`%.  
 * Odds offered by online sports books at the time the study was run offer a benchmark forecast of the status quo for each division.  I collected odds from 24 popular sites from the day the study.  Status quo probabilities implied by the offered odds ranged from `r round(min(book.probs.sq),1)`% to `r round(max(book.probs.sq),1)`%.
+* Mean probabilities elicited from participants were highly correlate with mean probabilities implied by odds offered by sports books, r= `r round(cor(as.vector(book.probs.sq), as.vector(sqef.probs.sq)),3)`.
+````{r}
+summary(aov.dev <- aov(devMean ~ sourceCond*frameCond, data=sqef))
+````
+Again, the main effect of question framing is significant, but neither the effect of question source, nor the interaction are significant.
+````{r}
+bargraph.CI(data=sqef, x.factor=frameCond, response=devMean, group=sourceCond, 
+            legend=T, 
+            ylab="Deviation from Book Status Quo", xlab="Framing Condition")
+````
+Participants in the Status Quo question frame condition predicted significantly higher probabilities relative to the public odds on each team than did those in the change frame condition.  In fact, forecasts by the Status Quo condition were significantly higher than the online odds (mean = `r round(t.devmean.sq$estimate,2)` percentage points, p = `r round(t.devmean.sq$p.value,3)`) while those in the Change condition forecast significantly lower probabilities (mean = `r round(t.devmean.ch$estimate,2)` percentage points, p = `r round(t.devmean.ch$p.value,3)`).
+
+#### DV: forecast probability compared to historic base rate
+Another measure of forecasting behavior is how well participants were calibrated relative to the historical base rate of status quo outcomes in this domain.  In the NFL, the current division structure has been in place since the 2002 season, so this is the 10th season in which incumbent champions have the chance to repeat.  With 8 divisions we have 72 observations, of which `r round(prop.sq*100,2)`% have been status quo outcomes.
+
+In this study, unlike forecasters in the IARPA tournament, we observe participants over-forecasting the status-quo relative to the historical base rate.  Mean forecast probabilities exceeded `r round(prop.sq*100,2)`% in all conditions by a statistically significant margin, (mean = `r round(t.sq.hist$estimate,2)`%, p = `r round(t.sq.hist$p.value,3)`))
 
 
-
-### Fanhood
-Fanhood was measured in three ways
+#### Moderator: Fandom (expertise)
+Fandom was measured in three ways:
 
 * Social comparison: Would you consider yourself more or less of a fan of the NFL than the average American? (7pt scale, from Much Less to Much More)
-* Behavioral self report: Please estimate how many NFL games you watch in an average week during the regular season.
-* Recruitment source: Participants recuited from the online NFL discussion community were considered NFL fans.
+* Behavioral self report: Please estimate how many NFL games you watch in an average week during the regular season.  Analyses completed with log-transformed measure as the distribution was highly right-skewed.
+* Recruitment source: Participants recruited from the online NFL discussion community were considered NFL fans.
 
-The three measures were highly related (standardized alpha = `r round(alpha(fan.measures)$total["std.alpha"],2)`).
+The three measures were moderately well related (standardized alpha = `r round(alpha(fan.measures)$total["std.alpha"],2)`) and so were standardized and combined into a single measure of fandom.
+````{r} 
+summary(lm(pMean ~ fandom + frameCond * sourceCond, data=sqef))
+````
+The degree to which a participant was a fan of the NFL was not related in this study to their mean forecasts of the status quo outcome occurring.  
+
+
+
 
 
 

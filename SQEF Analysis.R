@@ -1,4 +1,5 @@
 library(plyr)
+library(reshape2)
 library(psych)
 library(ggplot2)
 library(sciplot)
@@ -161,7 +162,8 @@ ggplot(data=sqef, aes(x=fanNgames, fill=src)) + geom_density(alpha=.5)
 ####### ---------------------------------
 fan.measures <- sqef[c("logfanNgames","fanLikert", "src")]
 fan.measures$src <- as.numeric(fan.measures$src)
-alpha(fan.measures) 
+alpha(fan.measures)
+sqef$fandom <- rowMeans(fan.measures, na.rm=TRUE)
 
 ggplot(sqef, aes(logfanNgames, fanLikert)) +
   geom_jitter(aes(color=src)) +
@@ -194,7 +196,9 @@ book.dev$devMean <- rowMeans(book.dev, na.rm=T)
 sqef <- cbind(sqef,book.dev)
 
 # check relationship between book odds and participant probs
-plot(book.probs.sq, colMeans(sqef[prob.cols], na.rm=T),xlim=c(0,100), ylim=c(0,100))
+sqef.probs.sq <- colMeans(sqef[prob.cols],na.rm=T)
+plot(book.probs.sq, sqef.probs.sq ,xlim=c(0,100), ylim=c(0,100))
+cor(as.vector(book.probs.sq), as.vector(sqef.probs.sq))
 
 ####### ---------------------------------
 #######  Status-quo base rate in NFL since 2002
@@ -218,6 +222,8 @@ for(div in colnames(nfl.hist)){
 # tally the results
 prop.sq <- prop.table(table(nfl.sq))["TRUE"]
 
+t.sq.hist <- t.test(sqef$pMean,mu=prop.sq)
+
 ####### ---------------------------------
 #######  Hypothesis Tests
 ####### ---------------------------------
@@ -229,19 +235,27 @@ bargraph.CI(data=sqef, x.factor=frameCond, response=pMean, group=sourceCond,
             ylab="Probability of Status Quo", xlab="Framing Condition")
 
 # do source and frame manipulations predict devation from book odds of status quo?
-aov.dev <- aov(devMean ~ sourceCond*frameCond, data=sqef)
-summary(aov.dev)
-
+summary(aov.dev <- aov(devMean ~ sourceCond*frameCond, data=sqef))
 bargraph.CI(data=sqef, x.factor=frameCond, response=devMean, group=sourceCond, 
             legend=T, 
             ylab="Deviation from Book Status Quo", xlab="Framing Condition")
+t.devmean.sq <- t.test(sqef$devMean[sqef$frameCond=="Status Quo"],mu=0)
+t.devmean.ch <- t.test(sqef$devMean[sqef$frameCond=="Change"],mu=0)
+
 
 # mean fcast per division
 colMeans(sqef[prob.cols], na.rm=T) - 
 head(book.probs.sq,n=1)
 
 #expertise and status quo endoresment
-summary(lm(pMean ~ src + fanNgames + frameCond + sourceCond, data=sqef))
+summary(lm(pMean ~ fandom + frameCond * sourceCond, data=sqef))
+
+## melted for mixed-model analysis
+sqef.melt <- melt(sqef, id.vars = c("id","sourceCond","frameCond","src"), 
+                  measure.vars  = prob.cols, 
+                  variable.name = "division",
+                  value.name    = "probability",
+                  na.rm         = TRUE)
 
 
 
