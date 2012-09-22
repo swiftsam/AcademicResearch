@@ -1,0 +1,98 @@
+SQEI Results (Status Quo Endorsement, Ilana's)
+========================================================
+(code snippets included as needed, but full analysis completed in [SQEI Analysis.R][1])
+``` {r message=FALSE, results='hide', warning=FALSE, fig.keep='none'}
+source("SQEI Analysis.R")
+```
+
+### Data definitions
+
+#### Condition Labels
+First, I think I agree with Barb about which questions deserve which labels.  It was easiest for me to think of the conditions by considering which verb was used and whether "not" was included.  
+
+SQ / Change Frame:
+* status quo: "remain", "continue"
+* change: "vacate", "driven out", "voted out", "withdraw", "continue"
+
+Positive / Negative:
+* positive: ""
+* negative: "not"
+
+So, 
+> Will Mario Monti not remain the Prime Minister of Italy until 1 January 2013?
+
+is considered Status Quo ("remain") & Negative ("not"), while 
+> Will Mario Monti not vacate the office of Prime Minister of Italy before 1 January 2013?
+
+is considered Change ("vacate") & Negative ("not")
+
+````
+sqei$frameCond[sqei$sqch == "Change" & sqei$posneg == "positive"] <- "change"
+sqei$frameCond[sqei$sqch == "Change" & sqei$posneg == "negative"] <- "statusquo"
+sqei$frameCond[sqei$sqch == "SQ"     & sqei$posneg == "positive"] <- "statusquo"
+sqei$frameCond[sqei$sqch == "SQ"     & sqei$posneg == "negative"] <- "change"
+````
+
+#### Status Quo probability across all items
+Then, to make all judgments equivalent for analysis, I subtracted each probability in the Change & Positive and Status Quo & Negative conditions from 100 so that all probabilities are the probability of the status quo persisting.  (I think this is opposite of the adjustment you both made on this data, but I wanted to be consistent with the probabilities in the NFL study).  
+````
+change.pos.rows <- which(sqei$frameCond=="change"    & sqei$negCond=="positive")
+sq.neg.rows     <- which(sqei$frameCond=="statusquo" & sqei$negCond=="negative")
+
+sq[c(change.pos.rows, sq.neg.rows),] <- 100-sq[c(change.pos.rows, sq.neg.rows),]
+````
+
+### Analysis
+#### DV: Mean probability of Status Quo
+"Mean probability of status quo" is the mean of the 8 probabilities reported by each participant after converting (when necessary by condition as described above) to represent the status quo outcome.
+
+"avgconf" is the mean of the 8 responses to the knowledge / expertise question (1=no knowledge, 5=expert) and was included as a control.
+
+There are no significant main effects or interections.
+
+````{r}
+bargraph.CI(frameCond,meanpSQ,group=negCond,data=sqei,
+            legend=T, 
+            ylim=c(0,100), 
+            ylab="Mean probability of status quo", xlab="Frame Condition")
+summary(aov(meanpSQ ~ negCond * frameCond + avgconf, data=sqei))
+````
+
+#### DV: Repeated measures mixed model of probability of status quo
+Each participant responded to 8 items allowing us to model their responses per item while allowing for uncorrelated error at the participant and item level.
+````{r}
+summary(aov(pSQ ~ frameCond * negCond + conf + Error(id + item), data=sqei.long))
+````
+In this analysis we see significant effects of positive/negative confition and self-rated knowledge on partiicpant's forecasts of the status quo probability.  The effect of the Status quo / change frame is marginally significant.
+````{r fig.width=10, fig.height=6}
+ggplot(sqei.long, aes(item,pSQ)) + geom_boxplot(aes(color=negCond))
+````
+A boxplot of probability judgments by Item and positive/negative condition reveals that forecasts of the status quo are higher in the Positive condition for 5 of 8 items.  It also shows that item 2 (Assad in Syria) is the only item for which the status quo is generally rated as less than 50% likely.
+````{r fig.width=10, fig.height=6}
+ggplot(sqei.long, aes(item,pSQ)) + geom_boxplot(aes(color=frameCond))
+````
+A similar boxplot of probability judgments by Item and status quo / change framing shows no clear pattern, consistent with the marginal result.
+
+#### Subset: Only high-knowledge forecasts
+Participants self-reported perceived knowledge on each item.  The scale is described as 1 - 5, but responses range from 0 to 5.  Proportions of responses:
+````{r}
+round(prop.table(table(sqei.long$conf)),2)
+````
+We'll consider responses above 1 (43% of responses) as sufficiently knowledgeable.
+````{r}
+sqei.exp <- subset(sqei, avgconf > 1)
+summary(aov(meanpSQ ~ negCond * frameCond, data=sqei.exp))
+````
+I find no significant effects of confition when limiting the analysis to participants with a mean knowledge ratings greater than 1 (n=81).
+
+We can also do the repeated measures mixed model including only items on which participants rated their knowledge > 1.  I drop knowledge ratings from the model since we truncated the distribution.
+````{r}
+summary(aov(pSQ ~ frameCond * negCond + Error(id + item), data=sqei.long.exp))
+````
+Again, I find no significant effects.
+
+### Conclusions
+I am still not entirely sure how to properly interpret these results.  The fact that the "negative" phrasing has a significant effect but that there is no interaction with the status quo / change frame seems difficult to resolve.  Ilana, does the way that you labeled the conditions with respect to positive/negative lead to more straightforward interpretation for you?
+
+
+[1]: https://github.com/swiftsam/research/blob/master/SQEI%20Analysis.R 
