@@ -154,8 +154,13 @@ length(unique(sqef$geo))        # number of US states represented
 table(sqef$src)                 # recruitment source
 
 # football fandom
-ggplot(data=sqef, aes(x=fanLikert, fill=src)) + geom_density(alpha=.5, adjust=1.4)
-ggplot(data=sqef, aes(x=fanNgames, fill=src)) + geom_density(alpha=.5)
+ggplot(data=sqef, aes(x=fanLikert, fill=src)) + geom_density(alpha=.5, adjust=1.4) 
+ggplot(data=sqef, aes(x=fanNgames, fill=src)) + 
+  geom_density(alpha=.5) + 
+  xlab("Number of games watched / week")
+
+describe(sqef$fanLikert)
+describe(sqef$fanNgames)
 
 ####### ---------------------------------
 #######  Composite measures
@@ -232,13 +237,14 @@ t.sq.hist <- t.test(sqef$pMean,mu=prop.sq)
 summary(aov(pMean ~ sourceCond*frameCond, data=sqef))
 bargraph.CI(data=sqef, x.factor=frameCond, response=pMean, group=sourceCond, 
             legend=T, ylim=c(0,100), 
-            ylab="Probability of Status Quo", xlab="Framing Condition")
+            ylab="Probability of Status Quo", xlab="Framing Condition", cex.axis=2, cex.names=2, cex.lab=1.5)
+describe.by(sqef$pMean, sqef$frameCond)
 
 # do source and frame manipulations predict devation from book odds of status quo?
 summary(aov.dev <- aov(devMean ~ sourceCond*frameCond, data=sqef))
 bargraph.CI(data=sqef, x.factor=frameCond, response=devMean, group=sourceCond, 
             legend=T, 
-            ylab="Deviation from Book Status Quo", xlab="Framing Condition")
+            ylab="Deviation from Book Status Quo", xlab="Framing Condition", cex.axis=2, cex.names=2, cex.lab=1.5)
 t.devmean.sq <- t.test(sqef$devMean[sqef$frameCond=="Status Quo"],mu=0)
 t.devmean.ch <- t.test(sqef$devMean[sqef$frameCond=="Change"],mu=0)
 
