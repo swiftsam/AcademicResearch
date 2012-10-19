@@ -10,10 +10,10 @@ outputPlots <- FALSE
 ####### ---------------------------------
 
 #load data
-lve <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-data-2012-03-01.csv", stringsAsFactors=F)
-reqs <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-reqs-2012-03-15.csv", stringsAsFactors=F, header=F)
-log <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-log-2012-03-21.csv",stringsAsFactors=F, header=F)
-ids <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-ids-2012-03-05.csv", stringsAsFactors=F, header=F)
+lve <- read.csv("http://samswift.org/data/LVE-data-2012-03-01.csv", stringsAsFactors=F)
+reqs <- read.csv("http://samswift.org/data/LVE-reqs-2012-03-15.csv", stringsAsFactors=F, header=F)
+log <- read.csv("http://samswift.org/data/LVE-log-2012-03-21.csv",stringsAsFactors=F, header=F)
+ids <- read.csv("http://samswift.org/data/LVE-ids-2012-03-05.csv", stringsAsFactors=F, header=F)
 
 #set empty strings to NA
 lve[lve==""] <- NA
@@ -248,7 +248,7 @@ if(outputPlots) {qplot(ArgCond,TimeDesc_4,data=requesters, geom="boxplot")}
 #######  Time 3 follow-up survey
 ####### ---------------------------------
 #load data
-lve.t3 <- read.csv("http://swift.cbdr.cmu.edu/data/LVE-followup-2012-03-29.csv", stringsAsFactors=F)
+lve.t3 <- read.csv("http://samswift.org/data/LVE-followup-2012-03-29.csv", stringsAsFactors=F)
 
 #set empty strings to NA
 lve.t3[lve.t3==""] <- NA

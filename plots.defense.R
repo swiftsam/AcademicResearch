@@ -235,8 +235,7 @@ ggplot(data=asm.sv5_sum, aes(y=mean, x=ArgCond,fill=ArgCond)) +
   ylab("Subjective Value (5 item, mean)") +
   scale_fill_manual(values = palette, name="ArgCond") +
   scale_y_continuous(limits=c(1,7),oob=rescale_none) +
-  opts(legend.position = "none") +
-  theme_black_presentation()
+  theme(legend.position = "none")
 ggsave(filename="~/Desktop/asm.sat_sum.png", width=9, height=7)
 
 

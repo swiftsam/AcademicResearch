@@ -3,8 +3,8 @@ library(psych)
 library(irr)
 
 #import data
-sun.i <- read.csv("http://swift.cbdr.cmu.edu/data/SUN-data-indiv-2011-01-30.csv")
-sun.coded.free <-read.csv("http://swift.cbdr.cmu.edu/data/SUN-coded-freecond-arg-type-2012-04-28.csv")
+sun.i <- read.csv("http://samswift.org/data/SUN-data-indiv-2011-01-30.csv")
+sun.coded.free <-read.csv("http://samswift.org/data/SUN-coded-freecond-arg-type-2012-04-28.csv")
 attach(sun.i)
 
 #clean data

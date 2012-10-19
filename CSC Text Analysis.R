@@ -8,7 +8,7 @@ library(ggplot2)
 #######  Data Prep
 ####### ---------------------------------
 
-#csc <- read.csv("http://swift.cbdr.cmu.edu/data/CSC-data-2011-12-01.csv", stringsAsFactors=FALSE)
+#csc <- read.csv("http://samswift.org/data/CSC-data-2011-12-01.csv", stringsAsFactors=FALSE)
 
 #set empty strings to NA
 #csc[csc==""] <- NA

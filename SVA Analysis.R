@@ -6,7 +6,7 @@ library(psych)
 ####### ---------------------------------
 
 #load ratings data 
-sva <- read.csv("http://swift.cbdr.cmu.edu/data/SVA-data-2012-03-21.csv", stringsAsFactors=F)
+sva <- read.csv("http://samswift.org/data/SVA-data-2012-03-21.csv", stringsAsFactors=F)
 
 #set empty strings to NA
 sva[sva==""] <- NA
@@ -29,7 +29,7 @@ M_seasonsal_tires <- mean(c(ratings[["summer_tires","mean"]],ratings[["winter_ti
 ratings[nrow(ratings)+1,] <- c(M_seasonsal_tires,"seasonal_tires")
 
 #load text mapping table
-sva.tmap <- read.csv("http://swift.cbdr.cmu.edu/data/SVA-text-mapping-2012-04-03.csv",stringsAsFactors=F)
+sva.tmap <- read.csv("http://samswift.org/data/SVA-text-mapping-2012-04-03.csv",stringsAsFactors=F)
 sva.tmap$X <-NULL
 sva.tmap$words <- apply(sva.tmap, 1, function(row){paste(row[4:ncol(sva.tmap)],collapse=",")})
 sva.tmap$words <- gsub(",,","",sva.tmap$words)

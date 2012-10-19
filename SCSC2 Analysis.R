@@ -11,7 +11,7 @@ rm(list=ls())
 library(reshape2)
 library(psych)
 
-s2 <- read.csv("http://swift.cbdr.cmu.edu/data/SCSC2-data-2003-12-07.csv")
+s2 <- read.csv("http://samswift.org/data/SCSC2-data-2003-12-07.csv")
 #column label code ... [item][Candidate number][disposition condition][situation condition]
 #example "Success.CA.GH.IH" = Success rating, Candidate A, Grades:High, Inflation:High
 

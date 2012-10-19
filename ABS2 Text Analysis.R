@@ -11,7 +11,7 @@ outputPlots <- FALSE
 ####### ---------------------------------
 
 #load and prep ABS2 data
-#ABS2 <- read.csv("http://swift.cbdr.cmu.edu/data/ABS2-data-2012-02-24.csv", stringsAsFactors=F)
+#ABS2 <- read.csv("http://samswift.org/data/ABS2-data-2012-02-24.csv", stringsAsFactors=F)
 #source("ABS2 Data Prep.R")
 #table(ABS2$RoleCond)
 

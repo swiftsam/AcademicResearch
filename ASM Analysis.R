@@ -10,9 +10,9 @@ library(nlme)
 ####### ---------------------------------
 
 #load data
-ASM <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-data-2012-02-07.csv", stringsAsFactors=F)
-argUseCoded <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-coded-ArgUse-2012-03-28.csv", stringsAsFactors=F)
-attrSalCoded <- read.csv("http://swift.cbdr.cmu.edu/data/ASM-coded-AttrSal-2012-04-02.csv")
+ASM <- read.csv("http://samswift.org/data/ASM-data-2012-02-07.csv", stringsAsFactors=F)
+argUseCoded <- read.csv("http://samswift.org/data/ASM-coded-ArgUse-2012-03-28.csv", stringsAsFactors=F)
+attrSalCoded <- read.csv("http://samswift.org/data/ASM-coded-AttrSal-2012-04-02.csv")
 
 #set empty strings to NA
 ASM[ASM==""] <- NA
