@@ -123,10 +123,16 @@ fcast.company <- ddply(fcasts, c("company"), function(df){
                          c("mean.fcast" = mean(df$fcast),
                            "n.fcast" = nrow(df))
                        })
+pt <- sqfc[c("id","perstaking")]
 
-summary(lmer(fcast ~ FrameCond + SourceCond + (FrameCond + SourceCond|id), fcasts))
+fcasts <- merge(fcasts,pt, by="id")
+
+summary(lmer(fcast ~ FrameCond + SourceCond + perstaking + (1|id), fcasts))
+summary(aov(fcast ~ FrameCond + SourceCond + perstaking, data=fcasts))
+
 
 bargraph.CI(FrameCond, fcast, group=SourceCond, data=fcasts, ylim=c(0,100), legend=TRUE)
+
 
 
 

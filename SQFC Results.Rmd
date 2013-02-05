@@ -1,0 +1,37 @@
+SQFC (Status Quo endorsement, Fortune Ceos) Results
+========================================================
+
+### Intro
+After finding an effect of question framing, but not question source in SQEF and some mixed results in related studies, we tried again at a scenario which would capture the conversational norm phenomena we feel exists in the IARPA context.
+
+In this study, partiticpants were asked to forecast whether the current CEOs of some fortune 100 companies would be in their current role one year from now.  To heighten the conversational aspect, we noted that, "A professor at Wharton is interested in whether students can predict which CEOs will ${e://Field/OutcomeVerb} by Dec 31, 2013 as well as experts can.  Please provide your best estimates."
+
+### Methods
+Participants were asked to estimate the probability that each of 10 current CEOs would be CEO as of December 31st 2013. Participants were randomly assigned to condition in a 2x3 design.
+
+* Question framing, "What is the probability that the current CEO of [Company], [FirstName LastName] will  ____________ December 31st, 2013? "
+ * Status quo frame:  "remain in the position of CEO through"
+ * Change frame: "vacate the position of CEO before"
+* Question source, "You will be making estimates about the CEOs of 10 corporations _____________"
+ * Expert: "of interest to Wharton faculty and our research team."
+ * Random: "randomly selected from the Fortune 100 list."
+ * None: "from the Fortune 100 list."
+ 
+All participants assigned probabilities to all 10 companies, presented in a random order.
+
+### Results
+``` {r message=FALSE, results='hide', warning=FALSE, fig.keep='none'}
+source("SQFC Analysis.R")
+```
+
+#### DV: mean probability of status quo
+* Probabilities assigned by participants in the Change Frame condition were subtracted from 100 to convert to probability of the status quo.  
+
+```{r}
+bargraph.CI(FrameCond, fcast, group=SourceCond, data=fcasts, ylim=c(0,100), legend=TRUE,
+            ylab="Probability of Status Quo",
+            xlab="Question Frame Condition")
+
+summary(aov(fcast ~ FrameCond + SourceCond + perstaking, data=fcasts))
+```
+

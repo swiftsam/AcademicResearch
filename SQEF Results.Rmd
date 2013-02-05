@@ -42,6 +42,11 @@ All participants assigned probabilities to a random subset of 4 of the 8 teams.
 #### DV: mean probability of status quo
 * Probabilities assigned by participants in the Change Frame condition were subtracted from 100 to convert to probability of the status quo.  
 * Mean probability (pMean) is the mean of the 4 probabilities elicited from the participant.
+
+```{r, results='asis'} 
+print(pMean.cond)
+``` 
+
 ```{r} 
 summary(aov(pMean ~ sourceCond*frameCond, data=sqef))
 ```

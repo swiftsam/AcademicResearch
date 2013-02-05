@@ -3,6 +3,7 @@ library(reshape2)
 library(psych)
 library(ggplot2)
 library(sciplot)
+library(xtable)
 
 ####### ---------------------------------
 #######  Data Prep
@@ -233,6 +234,9 @@ t.sq.hist <- t.test(sqef$pMean,mu=prop.sq)
 #######  Hypothesis Tests
 ####### ---------------------------------
 
+# summarize means by group
+pMean.cond <- dcast(sqef, frameCond ~ sourceCond,value.var="pMean", mean)
+
 # do source and frame manipulations predict status quo forecasts?
 summary(aov(pMean ~ sourceCond*frameCond, data=sqef))
 bargraph.CI(data=sqef, x.factor=frameCond, response=pMean, group=sourceCond, 
@@ -250,8 +254,7 @@ t.devmean.ch <- t.test(sqef$devMean[sqef$frameCond=="Change"],mu=0)
 
 
 # mean fcast per division
-colMeans(sqef[prob.cols], na.rm=T) - 
-head(book.probs.sq,n=1)
+colMeans(sqef[prob.cols], na.rm=T) - head(book.probs.sq,n=1)
 
 #expertise and status quo endoresment
 summary(lm(pMean ~ fandom + frameCond * sourceCond, data=sqef))
