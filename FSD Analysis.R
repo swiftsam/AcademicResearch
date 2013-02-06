@@ -153,11 +153,18 @@ m14 <- polr(Outcome ~ relGPA + mcAvgGPA + Age + WorkHistory + GMAT + UGI_USNewsZ
 #M15: M7 with nominal GPA instead of relative GPA
 m15 <- polr(Outcome ~ GPA + mcAvgGPA + Age + WorkHistory + GMAT + UGI_USNews + Gender + USCitizen + Race + admitschool + appyear, data=fsd, Hess=TRUE)
 
+#M16: PLOS reviewer request
+m16 <- polr(Outcome ~ relGPA + mcAvgGPA + Age + WorkHistory + GMAT + UGI_USNewsZ + UGI_AvgEntranceSATZ + UGI_GourmanZ + Gender + USCitizen + Race + admitschool + appyear, data=fsd, Hess=TRUE)
+m17 <- polr(Outcome ~ relGPA +            Age + WorkHistory + GMAT + UGI_USNewsZ + UGI_AvgEntranceSATZ + UGI_GourmanZ + Gender + USCitizen + Race + admitschool + appyear, data=fsd, Hess=TRUE)
+
+
 ##TABLES##
 library(memisc)
 mtable.main <- mtable("Model 1"=m1,"Model 2"=m2,"Model 3"=m3, "Model 4"=m4, "Model 5"=m5, "Model 6"=m6, "Model 7"=m7, summary.stats=c("N","AIC"))
 mtable.quality <-mtable("US News"=m10, "Gourman"=m12, "Entrance SAT"=m13, "All"=m14, summary.stats=c("N","AIC"))
 mtable.alt <-mtable("Standard"=m7,"Interaction"=m9,"Top Schools"=m11,"Nominal GPA"=m15, summary.stats=c("N","AIC"))
+mtable.plos <-mtable("Kitchen Sink"=m16, "No AvgGPA"=m17, summary.stats=c("N","AIC"))
+
 
 #Readable output of tables
 mtable.main
@@ -168,6 +175,7 @@ mtable.alt
 write.mtable(mtable.main, file="mtable.main.txt")
 write.mtable(mtable.quality, file="mtable.quality.txt")
 write.mtable(mtable.alt, file="mtable.alt.txt")
+write.mtable(mtable.plos, file="mtable.plos.txt")
 
 #interpretation of coefficients
 exp(coef(m10))
