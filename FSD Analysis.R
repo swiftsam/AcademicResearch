@@ -199,16 +199,16 @@ avgGPA = c(-2*mcAvgGPA.sd,0,2*mcAvgGPA.sd)
 #avgGPA = c(-.3,0,.3)
 
 #setting control variable levels
-Interview_Z    <- 0
-Age            <- mean(pred.model$model["Age"])
-WorkHistory    <- mean(pred.model$model["WorkHistory"])
-GMAT           <- mean(pred.model$model["GMAT"])
-UGI_USNews     <- mean(pred.model$model["UGI_USNews"])
-prop.gender    <- table(pred.model$model$Gender)     /nrow(pred.model$model)
-prop.uscitizen <- table(pred.model$model$USCitizen)  /nrow(pred.model$model)
-prop.race      <- table(pred.model$model$Race)       /nrow(pred.model$model)
-prop.school    <- table(pred.model$model$admitschool)/nrow(pred.model$model)
-prop.year      <- table(pred.model$model$appyear)    /nrow(pred.model$model)
+Interview_Z<-0
+Age<-mean(pred.model$model["Age"])
+WorkHistory<-mean(pred.model$model["WorkHistory"])
+GMAT<-mean(pred.model$model["GMAT"])
+UGI_USNews<-mean(pred.model$model["UGI_USNews"])
+prop.gender = table(pred.model$model$Gender)/nrow(pred.model$model)
+prop.uscitizen = table(pred.model$model$USCitizen)/nrow(pred.model$model)
+prop.race = table(pred.model$model$Race)/nrow(pred.model$model)
+prop.school = table(pred.model$model$admitschool)/nrow(pred.model$model)
+prop.year = table(pred.model$model$appyear)/nrow(pred.model$model)
 
 values.fixed<-c(
             Age,
