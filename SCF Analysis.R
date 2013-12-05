@@ -33,6 +33,7 @@
 library(data.table)
 library(plyr)
 library(reshape2)
+library(ggplot2)
 options(stringsAsFactors = FALSE)
 
 # Read data
@@ -49,11 +50,33 @@ wk12         <- wk12[-1,]
 wk13.headers <- wk13[ 1,]
 wk13         <- wk13[-1,]
 
+# match game numbers from surveys to games df
+wk11.games   <- data.frame(t(wk11[2, names(wk11) %in% paste("game",1:16,sep="")]),week = 11)
+wk12.games   <- data.frame(t(wk12[2, names(wk12) %in% paste("game",1:16,sep="")]),week = 12)
+wk13.games   <- data.frame(t(wk13[1, names(wk13) %in% paste("game",1:16,sep="")]),week = 13)
+
+# extract game_ids from the rownames (e.g. "game15" --> 15)
+wk11.games$game_id <- as.numeric(substr(row.names(wk11.games),5, nchar(row.names(wk11.games))))
+wk12.games$game_id <- as.numeric(substr(row.names(wk12.games),5, nchar(row.names(wk12.games))))
+wk13.games$game_id <- as.numeric(substr(row.names(wk13.games),5, nchar(row.names(wk13.games))))
+
+names(wk11.games)[1] <- names(wk12.games)[1] <- names(wk13.games)[1] <- "game"
+s.games <- rbind(wk11.games, wk12.games)
+s.games <- rbind(s.games, wk13.games)
+row.names(s.games) <- NULL
+
+s.games$away_team <- sapply(sapply(s.games$game, strsplit, split=" @ "), function(m) m[1])
+s.games$home_team <- sapply(sapply(s.games$game, strsplit, split=" @ "), function(m) m[2])
+s.games$game <- NULL
+
+games <- join(games, s.games, by=c("week","away_team","home_team"))
+
+
 # Define fields we actually want
-id.fields       <- c("V6","V8","V9","V10","vid","cond","week")
-id.names        <- c("ip_address","start_date","end_date","finished","vid","cond","week")
+id.fields       <- c("V6","V8","V9","vid","cond","week")
+id.names        <- c("ip_address","start_date","end_date","vid","cond","week")
 response.fields <- c(paste("sort",1:16,"Group",    sep="_"), 
-                     paste("sort",1:16,"Rank",     sep="_"),
+                     paste("rank",1:16,"Rank",     sep="_"),
                      paste("Q",1:16,".1_2",        sep=""),
                      paste("Q",1:16,".2_2_1_TEXT", sep=""))
 response.names  <- c(paste("sort",1:16,sep=""),
@@ -85,9 +108,43 @@ scf <- scf[nchar(scf$vid) == 36 &                     # vid must be 36 character
            !is.na(scf$value) &                        # throw out non-responses (?)
            scf$cond %in% c("control","rank","sort"),] # condition must be assigned
 
-# Identify game value from variable names
-scf$game <- as.numeric(substr(scf$variable, 5, nchar(scf$variable)))
-xtabs(data = scf, ~ game + week)
+# Break "variable" into response and game
+scf$game_id  <- as.numeric(substr(scf$variable, 5, nchar(scf$variable)))
+scf$response <- substr(scf$variable, 1, 4)
+scf$variable <- NULL
+xtabs(data = scf, ~ game_id + response)
+xtabs(data = scf, ~ week    + response)
+xtabs(data = scf, ~ game_id + week)
+
+# Cast back into semi-wide format (participants + week + game ~ responses) and merge game data
+scf      <- dcast(scf, vid + cond + week + game_id ~ response, value.var="value")
+scf$pick <- factor(scf$pick,levels=1:2, labels=c("away","home")) # the home team was always displayed second
+scf      <- join(scf, games[c("week","game_id","winner","avg_prob_home")], by=c("week","game_id"))
+
+# Calculate accuracy metrics
+scf$hit <- 0
+scf$hit[scf$pick == scf$winner] <- 1
+
+scf$prob_home <- scf$prob 
+scf$prob_home[scf$pick == "away" 
+              & !is.na(scf$prob_home)] <- 100 - scf$prob_home[scf$pick == "away"
+                                                              & !is.na(scf$prob_home)]
+
+ggplot(scf, aes(prob_home, avg_prob_home)) + 
+  geom_point(shape=1, position="jitter", alpha=.2) + 
+  geom_smooth() + 
+  facet_grid(.~cond) +
+  labs(x="Participant Probability of Home Team Win",
+       y="Vegas Implied Probability of Home Team Win") +
+  theme_bw(base_size=18)
+
+logit.hit <- glm(hit ~ cond + prob, data = scf, family = "binomial")
+
+# Calculate payouts
+
+
+
+
 
 
 
