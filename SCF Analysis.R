@@ -1,6 +1,6 @@
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ### SCF Analysis
-###
+### 
 ### Work with Jack Sol and Min Bang
 ### Notes:
 ### The number of games changed each week.
@@ -41,6 +41,10 @@ wk11  <- read.csv("http://samswift.org/data/SCF-wk11-data-2013-12-05.csv")
 wk12  <- read.csv("http://samswift.org/data/SCF-wk12-data-2013-12-05.csv")
 wk13  <- read.csv("http://samswift.org/data/SCF-wk13-data-2013-12-05.csv")
 games <- read.csv("http://samswift.org/data/SCF-games-2013-12-05.csv")
+
+####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Clean & Process Data
+####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Remove qualtrics' second header row
 wk11.headers <- wk11[ 1,]
@@ -121,27 +125,125 @@ scf      <- dcast(scf, vid + cond + week + game_id ~ response, value.var="value"
 scf$pick <- factor(scf$pick,levels=1:2, labels=c("away","home")) # the home team was always displayed second
 scf      <- join(scf, games[c("week","game_id","winner","avg_prob_home")], by=c("week","game_id"))
 
-# Calculate accuracy metrics
+### Calculate accuracy metrics
+# pick the winner, get a "hit"
 scf$hit <- 0
 scf$hit[scf$pick == scf$winner] <- 1
 
+# probability assigned to the home team (100-prob if they picked the away team)
 scf$prob_home <- scf$prob 
 scf$prob_home[scf$pick == "away" 
               & !is.na(scf$prob_home)] <- 100 - scf$prob_home[scf$pick == "away"
                                                               & !is.na(scf$prob_home)]
 
-ggplot(scf, aes(prob_home, avg_prob_home)) + 
-  geom_point(shape=1, position="jitter", alpha=.2) + 
-  geom_smooth() + 
-  facet_grid(.~cond) +
-  labs(x="Participant Probability of Home Team Win",
-       y="Vegas Implied Probability of Home Team Win") +
-  theme_bw(base_size=18)
+# probability assigned to the winning team (100-prob if they picked the loser)
+scf$prob_correct <- scf$prob_home
+scf$prob_correct[scf$winner == "away"] <- 100 - scf$prob_home[scf$winner == "away"]
 
-logit.hit <- glm(hit ~ cond + prob, data = scf, family = "binomial")
+####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Calculate payouts
+####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Calculate payouts
+scf$payout <- NA
+# misses always earn 0
+scf$payout[scf$hit == 0] <- 0
+# all hits in the control condition earn .10
+scf$payout[scf$hit == 1 & scf$cond == "control"] <- .10
+# hits in the sort condition are paid .5, .10, or .15
+scf$payout[scf$hit == 1 & scf$cond == "sort" & scf$sort == 0] <- .15
+scf$payout[scf$hit == 1 & scf$cond == "sort" & scf$sort == 1] <- .10
+scf$payout[scf$hit == 1 & scf$cond == "sort" & scf$sort == 2] <- .05
+# hits in the rank condition are paid based on rank
+# the number of ranking options varies by week, so the payout is centered at .10
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 1]  <- .17
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 2]  <- .16
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 3]  <- .15
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 4]  <- .14
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 5]  <- .13
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 6]  <- .12
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 7]  <- .11
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 8]  <- .10
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 9]  <- .09
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 10] <- .08
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 11] <- .07
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 12] <- .06
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 13] <- .05
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 14] <- .04
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 11 & scf$rank == 15] <- .03
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 1]  <- .17
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 2]  <- .16
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 3]  <- .15
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 4]  <- .14
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 5]  <- .13
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 6]  <- .12
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 7]  <- .11
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 8]  <- .10
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 9]  <- .09
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 10] <- .08
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 11] <- .07
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 12] <- .06
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 13] <- .05
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 12 & scf$rank == 14] <- .04
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 1]  <- .18
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 2]  <- .17
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 3]  <- .16
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 4]  <- .15
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 5]  <- .14
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 6]  <- .13
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 7]  <- .12
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 8]  <- .11
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 9]  <- .10
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 10] <- .09
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 11] <- .08
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 12] <- .07
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 13] <- .06
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 14] <- .05
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 15] <- .04
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 16] <- .03
 
+write.csv(scf, "~/Desktop/scf_processed.csv", row.names=F)
+
+# calculate total payment per participant
+scf          <- data.table(scf, key="vid,cond,week")
+payout.indiv <- scf[, list(cond         = cond[1],
+                           n_responses  = .N,
+                           n_hits       = sum(hit),
+                           n_na         = sum(is.na(payout)),
+                           total_payout = sum(payout, na.rm=T)), 
+                    by="vid,week"]
+
+setkeyv(payout.indiv, c("week","vid"))
+write.csv(payout.indiv, "~/Desktop/scf_payout_indiv_wk11-13.csv", row.names = F)
+
+####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Hypothesis Tests
+####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# did hit rate vary by condition?
+hit.cond <- scf[, list(hit_rate = mean(hit)), by=cond]
+chisq.test(x=scf$cond, y=scf$hit)
+summary(glm(hit ~ prob + cond, data=scf, family="binomial"))
+
+# did payout vary by condition?
+pay.cond <- scf[, list(mean_pay = mean(payout, na.rm=T),
+                       sd_pay   = sd(payout, na.rm=T),
+                       n        = .N)
+                , by=cond]
+summary(aov(payout ~ cond, data=scf))
+
+# did calibration vary by condition
+scf$bin      <- round(scf$prob / 5) * 5
+hit.cond.bin <- scf[, list(hit_rate = mean(hit), n = .N), by="cond,bin"]
+hit.cond.bin <- hit.cond.bin[bin >= 50,]
+
+ggplot(hit.cond.bin, aes(bin, hit_rate*100, color=cond)) + 
+  geom_abline(intercept=.50, slope=1) +
+  scale_x_continuous(limit=c(45,100), breaks=seq(45,100,5)) +
+  scale_y_continuous(limit=c(45,100), breaks=seq(45,100,5)) +
+  geom_point(aes(size = n), shape=19) + 
+  geom_smooth(se=F, size=1.25) +
+  labs(x="Confidence", y="Hit Rate", size="N Obs", color="Condition", title="Calibration by Condition\nSCF, weeks 11-13") +
+  theme_bw(base_size=16)
 
 
 
