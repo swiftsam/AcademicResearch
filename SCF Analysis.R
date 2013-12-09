@@ -39,7 +39,8 @@ options(stringsAsFactors = FALSE)
 wk11  <- read.csv("http://samswift.org/data/SCF-wk11-data-2013-12-05.csv")
 wk12  <- read.csv("http://samswift.org/data/SCF-wk12-data-2013-12-05.csv")
 wk13  <- read.csv("http://samswift.org/data/SCF-wk13-data-2013-12-05.csv")
-games <- read.csv("http://samswift.org/data/SCF-games-2013-12-05.csv")
+wk14  <- read.csv("http://samswift.org/data/SCF-wk14-data-2013-12-09.csv") 
+games <- read.csv("http://samswift.org/data/SCF-games-2013-12-09.csv")
 
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ### Clean & Process Data
@@ -52,20 +53,25 @@ wk12.headers <- wk12[ 1,]
 wk12         <- wk12[-1,]
 wk13.headers <- wk13[ 1,]
 wk13         <- wk13[-1,]
+wk14.headers <- wk14[ 1,]
+wk14         <- wk14[-1,]
 
 # match game numbers from surveys to games df
 wk11.games   <- data.frame(t(wk11[2, names(wk11) %in% paste("game",1:16,sep="")]),week = 11)
 wk12.games   <- data.frame(t(wk12[2, names(wk12) %in% paste("game",1:16,sep="")]),week = 12)
 wk13.games   <- data.frame(t(wk13[1, names(wk13) %in% paste("game",1:16,sep="")]),week = 13)
+wk14.games   <- data.frame(t(wk14[1, names(wk14) %in% paste("game",1:16,sep="")]),week = 14)
 
 # extract game_ids from the rownames (e.g. "game15" --> 15)
 wk11.games$game_id <- as.numeric(substr(row.names(wk11.games),5, nchar(row.names(wk11.games))))
 wk12.games$game_id <- as.numeric(substr(row.names(wk12.games),5, nchar(row.names(wk12.games))))
 wk13.games$game_id <- as.numeric(substr(row.names(wk13.games),5, nchar(row.names(wk13.games))))
+wk14.games$game_id <- as.numeric(substr(row.names(wk14.games),5, nchar(row.names(wk14.games))))
 
-names(wk11.games)[1] <- names(wk12.games)[1] <- names(wk13.games)[1] <- "game"
+names(wk11.games)[1] <- names(wk12.games)[1] <- names(wk13.games)[1] <- names(wk14.games)[1] <- "game"
 s.games <- rbind(wk11.games, wk12.games)
 s.games <- rbind(s.games, wk13.games)
+s.games <- rbind(s.games, wk14.games)
 row.names(s.games) <- NULL
 
 s.games$away_team <- sapply(sapply(s.games$game, strsplit, split=" @ "), function(m) m[1])
@@ -91,13 +97,16 @@ response.names  <- c(paste("sort",1:16,sep=""),
 wk11 <- wk11[names(wk11) %in% c(id.fields, response.fields)]
 wk12 <- wk12[names(wk12) %in% c(id.fields, response.fields)]
 wk13 <- wk13[names(wk13) %in% c(id.fields, response.fields)]
+wk14 <- wk14[names(wk14) %in% c(id.fields, response.fields)]
 
 wk11$week <- 11
 wk12$week <- 12
 wk13$week <- 13
+wk14$week <- 14
 
 scf <- rbind.fill(wk11, wk12)
 scf <- rbind.fill(scf, wk13)
+scf <- rbind.fill(scf, wk14)
 scf <- scf[c(id.fields, response.fields)]
 names(scf) <- c(id.names, response.names)
 
