@@ -40,7 +40,7 @@ wk11  <- read.csv("http://samswift.org/data/SCF-wk11-data-2013-12-05.csv")
 wk12  <- read.csv("http://samswift.org/data/SCF-wk12-data-2013-12-05.csv")
 wk13  <- read.csv("http://samswift.org/data/SCF-wk13-data-2013-12-05.csv")
 wk14  <- read.csv("http://samswift.org/data/SCF-wk14-data-2013-12-09.csv") 
-games <- read.csv("http://samswift.org/data/SCF-games-2013-12-09.csv")
+games <- read.csv("http://samswift.org/data/SCF-games.csv")
 
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ### Clean & Process Data
@@ -82,8 +82,8 @@ games <- join(games, s.games, by=c("week","away_team","home_team"))
 
 
 # Define fields we actually want
-id.fields       <- c("V6","V8","V9","vid","cond","week")
-id.names        <- c("ip_address","start_date","end_date","vid","cond","week")
+id.fields       <- c("V6","V8","V9","vid","cond","text3","week")
+id.names        <- c("ip_address","start_date","end_date","vid","cond","prob_phrase","week")
 response.fields <- c(paste("sort",1:16,"Group",    sep="_"), 
                      paste("rank",1:16,"Rank",     sep="_"),
                      paste("Q",1:16,".1_2",        sep=""),
@@ -110,6 +110,9 @@ scf <- rbind.fill(scf, wk14)
 scf <- scf[c(id.fields, response.fields)]
 names(scf) <- c(id.names, response.names)
 
+# Fill in prob_phrase condition for weeks 11-13 since it wasn't introduced until wk14
+scf$prob_phrase[is.na(scf$prob_phrase) & scf$week %in% 11:13] <- "confidence"
+
 # Melt data to long format
 scf <- melt(scf,id.vars=id.names, varnames=response.names)
 scf$variable <- as.character(scf$variable)
@@ -118,7 +121,8 @@ scf$value    <- as.numeric(scf$value)
 # Remove invalid rows
 scf <- scf[nchar(scf$vid) == 36 &                     # vid must be 36 characters
            !is.na(scf$value) &                        # throw out non-responses (?)
-           scf$cond %in% c("control","rank","sort"),] # condition must be assigned
+           scf$cond %in% c("control","rank","sort") & # condition must be assigned
+           scf$prob_phrase %in% c("confidence", "chances"),] # condition must be assigned
 
 # Break "variable" into response and game
 scf$game_id  <- as.numeric(substr(scf$variable, 5, nchar(scf$variable)))
@@ -127,9 +131,10 @@ scf$variable <- NULL
 xtabs(data = scf, ~ game_id + response)
 xtabs(data = scf, ~ week    + response)
 xtabs(data = scf, ~ game_id + week)
+xtabs(data = scf, ~ response + prob_phrase + week)
 
 # Cast back into semi-wide format (participants + week + game ~ responses) and merge game data
-scf      <- dcast(scf, vid + cond + week + game_id ~ response, value.var="value")
+scf      <- dcast(scf, vid + cond + prob_phrase + week + game_id ~ response, value.var="value")
 scf$pick <- factor(scf$pick,levels=1:2, labels=c("away","home")) # the home team was always displayed second
 scf      <- join(scf, games[c("week","game_id","winner","avg_prob_home")], by=c("week","game_id"))
 
@@ -208,6 +213,21 @@ scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 13] 
 scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 14] <- .05
 scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 15] <- .04
 scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 13 & scf$rank == 16] <- .03
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 1]  <- .17
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 2]  <- .16
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 3]  <- .15
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 4]  <- .14
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 5]  <- .13
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 6]  <- .12
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 7]  <- .11
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 8]  <- .10
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 9]  <- .09
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 10] <- .08
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 11] <- .07
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 12] <- .06
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 13] <- .05
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 14] <- .04
+scf$payout[scf$hit == 1 & scf$cond == "rank" & scf$week == 14 & scf$rank == 15] <- .03
 
 write.csv(scf, "~/Desktop/scf_processed.csv", row.names=F)
 
@@ -221,7 +241,7 @@ payout.indiv <- scf[, list(cond         = cond[1],
                     by="vid,week"]
 
 setkeyv(payout.indiv, c("week","vid"))
-write.csv(payout.indiv, "~/Desktop/scf_payout_indiv_wk11-13.csv", row.names = F)
+write.csv(payout.indiv, "~/Desktop/scf_payout_indiv_wk11-14.csv", row.names = F)
 
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ### Hypothesis Tests
@@ -239,7 +259,7 @@ pay.cond <- scf[, list(mean_pay = mean(payout, na.rm=T),
                 , by=cond]
 summary(aov(payout ~ cond, data=scf))
 
-# did calibration vary by condition
+# did calibration vary by condition?
 scf$bin      <- round(scf$prob / 5) * 5
 hit.cond.bin <- scf[, list(hit_rate = mean(hit), n = .N), by="cond,bin"]
 hit.cond.bin <- hit.cond.bin[bin >= 50,]
@@ -250,11 +270,20 @@ ggplot(hit.cond.bin, aes(bin, hit_rate*100, color=cond)) +
   scale_y_continuous(limit=c(45,100), breaks=seq(45,100,5)) +
   geom_point(aes(size = n), shape=19) + 
   geom_smooth(se=F, size=1.25) +
-  labs(x="Confidence", y="Hit Rate", size="N Obs", color="Condition", title="Calibration by Condition\nSCF, weeks 11-13") +
+  labs(x="Confidence", y="Hit Rate", size="N Obs", color="Condition", title="Calibration by Condition\nSCF, weeks 11-14") +
   theme_bw(base_size=16)
 
+# does correlation to betting lines vary by condition?
+ggplot(scf, aes(prob_home, avg_prob_home, color=cond)) +
+  geom_point(position="jitter", alpha=.5) +
+  geom_smooth(method="lm", se=F) +
+  theme_bw()
 
+cor(scf$prob_home, scf$avg_prob_home,use="complete.obs")
 
-
-
+# does the question framing (started in week 14) change the dist of forecasts
+ggplot(scf[week == 14,], aes(prob, fill = prob_phrase)) + 
+  geom_histogram(position="dodge", breaks=seq(50,100, 1)) +
+  labs(x="Expressed Probability", y="Count", fill="Response Phrase", title="Week 14 response frequencies by response phrase") +
+  theme_bw(base_size=18)
 
