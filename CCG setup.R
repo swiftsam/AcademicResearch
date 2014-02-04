@@ -1,5 +1,5 @@
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-### Coin Collecting Game Participant Setup
+### Coin Capacity Game Participant Setup
 ###
 ### Purpose
 ###  * To generate user and stimuli sequence tables for use in the "coin
