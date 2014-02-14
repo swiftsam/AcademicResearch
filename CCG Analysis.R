@@ -16,7 +16,7 @@ library(ggplot2)
 library(data.table)
 library(Rmisc)
 
-kDataDir <- file.path("~","Desktop","ccg3b")
+kDataDir <- file.path("http://samswift.org/data/")
 
 
 rational.benchmarks <- data.table("measure"   = rep(c("cost","revenue","profit"),4),
@@ -35,10 +35,10 @@ rational.benchmarks[, measure   := factor(measure, levels=c("cost","revenue","pr
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Read data from the four tables exported by the CCG program
-users   <- data.table(read.csv(file.path(kDataDir, "users.csv"),     header=FALSE, stringsAsFactors=F))
-blocks  <- data.table(read.csv(file.path(kDataDir, "log_block.csv"), header=FALSE, stringsAsFactors=F))
-rounds  <- data.table(read.csv(file.path(kDataDir, "log_round.csv"), header=FALSE, stringsAsFactors=F))
-surveys <- data.table(read.csv(file.path(kDataDir, "log_survey.csv"),header=FALSE, stringsAsFactors=F))
+users   <- data.table(read.csv(file.path(kDataDir, "CCG_users_2014-02-04.csv"),     header=FALSE, stringsAsFactors=F))
+blocks  <- data.table(read.csv(file.path(kDataDir, "CCG_block_2014-02-04.csv"), header=FALSE, stringsAsFactors=F))
+rounds  <- data.table(read.csv(file.path(kDataDir, "CCG_round_2014-02-04.csv"), header=FALSE, stringsAsFactors=F))
+surveys <- data.table(read.csv(file.path(kDataDir, "CCG_survey_2014-02-04.csv"),header=FALSE, stringsAsFactors=F))
 
 # set columns names
 setnames(users,   c("user_id","V2","user_ip","last_activity","last_page","first_activity",
