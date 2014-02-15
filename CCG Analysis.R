@@ -18,7 +18,6 @@ library(Rmisc)
 
 kDataDir <- file.path("http://samswift.org/data/")
 
-
 rational.benchmarks <- data.table("measure"   = rep(c("cost","revenue","profit"),4),
                                   "condition" = c(rep("gamma-left",3),
                                                   rep("gamma-right",3),
@@ -35,7 +34,7 @@ rational.benchmarks[, measure   := factor(measure, levels=c("cost","revenue","pr
 ####~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Read data from the four tables exported by the CCG program
-users   <- data.table(read.csv(file.path(kDataDir, "CCG_users_2014-02-04.csv"),     header=FALSE, stringsAsFactors=F))
+users   <- data.table(read.csv(file.path(kDataDir, "CCG_users_2014-02-04.csv"), header=FALSE, stringsAsFactors=F))
 blocks  <- data.table(read.csv(file.path(kDataDir, "CCG_block_2014-02-04.csv"), header=FALSE, stringsAsFactors=F))
 rounds  <- data.table(read.csv(file.path(kDataDir, "CCG_round_2014-02-04.csv"), header=FALSE, stringsAsFactors=F))
 surveys <- data.table(read.csv(file.path(kDataDir, "CCG_survey_2014-02-04.csv"),header=FALSE, stringsAsFactors=F))
@@ -74,11 +73,14 @@ coin.n.cond <- rounds[, list(count = .N / length(unique(user_id))),
 coin.dist.cond <- rounds[,list(mean=mean(coins_avail),
                                med = median(coins_avail)), 
                          by=condition]
-ggplot(coin.n.cond, aes(coins_avail, count, fill=condition)) + 
+p.coin.dist.cond <- ggplot(coin.n.cond, aes(coins_avail, count, fill=condition)) + 
   geom_vline(data=coin.dist.cond, aes(xintercept = mean), linetype="dashed") +
   geom_vline(data=coin.dist.cond, aes(xintercept = med), linetype="dotted") +
   geom_histogram(origin = -0.5,stat="identity") +
   scale_x_continuous(breaks=0:10)+
+  labs(x="Number of Coins",
+       y="Number of Rounds",
+       color="Condition") +
   facet_grid(condition~.) + 
   theme_bw(base_size=16)
 
@@ -92,12 +94,12 @@ pbs1.cond       <- surveys[question == "slider-pbs1",
                                 ci_high  = CI(response)["upper"]), 
                            by=condition]
 
-ggplot(pbs1.cond, aes(condition, mean, color=condition)) + 
+p.pbs1.cond <- ggplot(pbs1.cond, aes(condition, mean, color=condition)) + 
   geom_hline(yintercept=5, linetype="dashed")+
   geom_point(size = 5, shape=18) + 
   geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
   scale_y_continuous(limits=c(3.5,6.5), breaks=seq(3.5,6.5,.5)) +
-  labs(x="Condition", y="Mean Estimate of Previous Block Coins") +
+  labs(x="Condition", y="Estimate of Previous Block Coins") +
   theme_bw(base_size=16)
 
 pbs1.cond.block <- surveys[question == "slider-pbs1", 
@@ -106,13 +108,13 @@ pbs1.cond.block <- surveys[question == "slider-pbs1",
                                 ci_high  = CI(response)["upper"]), 
                            by=c("condition","block")]
 
-ggplot(pbs1.cond.block, aes(factor(block), mean, color=condition)) + 
+p.pbs1.cond.block <- ggplot(pbs1.cond.block, aes(factor(block), mean, color=condition)) + 
   geom_point(size = 3, shape=1) + 
   geom_line(aes(factor(block), mean, group=condition)) +
   geom_hline(yintercept=5, linetype="dashed")+
   geom_smooth(aes(group=1), method="lm") +
   scale_y_continuous(limits=c(3.5,6.5), breaks=seq(3.5,6.5,.5)) +
-  labs(x="Block", y="Mean Estimate of Previous Block Coins") +
+  labs(x="Block", y="Estimate of Previous Block (coins/rd)") +
   facet_grid(. ~ condition) +
   theme_bw(base_size=16)
 
@@ -124,7 +126,7 @@ coin.indiv.block <- merge(coin.indiv.block,
                                   list(user_id, condition, block, response)], 
                           by=c("user_id","block"))
 
-ggplot(coin.indiv.block, aes(mean_coin, response, color=condition)) +
+p.coin.indiv.block <- ggplot(coin.indiv.block, aes(mean_coin, response, color=condition)) +
   geom_abline(yintercept=0, slope=1, linetype="dashed") +
   geom_point(shape=1) +
   geom_smooth(method="lm", alpha=.1)+
@@ -140,11 +142,11 @@ error.coin.cond <- coin.indiv.block[ ,list(mean = mean(error),
                                            ci_high  = CI(error)["upper"]), 
                                       by=condition]
 
-ggplot(error.coin.cond, aes(condition, mean, color=condition)) +
+p.error.coin.cond <- ggplot(error.coin.cond, aes(condition, mean, color=condition)) +
   geom_hline(yintercept=0, linetype="dashed")+
   geom_point(size = 5, shape=18) + 
   geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
-  labs(x="Condition", y="Individual Estimate Error of Previous Block Coins") +
+  labs(x="Condition", y="Estimate Error of Previous Block (coins/rd)") +
   theme_bw(base_size=16)
 
 
@@ -163,7 +165,7 @@ cum.coin.indiv.block <- merge(cum.coin.indiv.block,
                                       list(user_id, condition, block, response)], 
                               by=c("user_id","block"))
 
-ggplot(cum.coin.indiv.block, aes(mean_coin, response, color=condition)) +
+p.cum.coin.indiv.block <- ggplot(cum.coin.indiv.block, aes(mean_coin, response, color=condition)) +
   geom_abline(yintercept=0, slope=1, linetype="dashed") +
   geom_point(shape=1) +
   geom_smooth(method="lm", alpha=.1)+
@@ -179,11 +181,11 @@ error.cum.cond <- cum.coin.indiv.block[ ,list(mean = mean(error),
                                               ci_high  = CI(error)["upper"]), 
                                        by=condition]
 
-ggplot(error.cum.cond, aes(condition, mean, color=condition)) +
+p.error.cum.cond <- ggplot(error.cum.cond, aes(condition, mean, color=condition)) +
   geom_hline(yintercept=0, linetype="dashed")+
   geom_point(size = 5, shape=18) + 
   geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
-  labs(x="Condition", y="Individual Estimate Error of All Prev Block Coins") +
+  labs(x="Condition", y="Estimate Error of All Prev Blocks (coins/rd)") +
   theme_bw(base_size=16)
 
 error.cum.cond.block <- cum.coin.indiv.block[ ,list(mean = mean(error),
@@ -191,13 +193,13 @@ error.cum.cond.block <- cum.coin.indiv.block[ ,list(mean = mean(error),
                                                     ci_high  = CI(error)["upper"]), 
                                              by=c("condition","block")]
 
-ggplot(error.cum.cond.block, aes(factor(block), mean, color=condition)) + 
+p.error.cum.cond.block <- ggplot(error.cum.cond.block, aes(factor(block), mean, color=condition)) + 
   geom_point(size = 3, shape=1) + 
   geom_line(aes(factor(block), mean, group=condition)) +
   geom_hline(yintercept=0, linetype="dashed")+
   geom_smooth(aes(group=1), method="lm") +
   #scale_y_continuous(limits=c(3.5,6.5), breaks=seq(3.5,6.5,.5)) +
-  labs(x="Block", y="Mean Error of All Prev Blocks Coins") +
+  labs(x="Block", y="Estimate Error of All Previous Blocks (coins/rd)") +
   facet_grid(. ~ condition) +
   theme_bw(base_size=16)
 
@@ -209,7 +211,7 @@ pgs.coins.cond <- surveys[question=="slider-pgs2",
                                ci_high  = CI(response)["upper"]),
                           by=condition]
 
-ggplot(pgs.coins.cond, aes(condition, mean, color=condition)) + 
+p.pgs.coins.cond <- ggplot(pgs.coins.cond, aes(condition, mean, color=condition)) + 
   geom_hline(yintercept=5, linetype="dashed")+
   geom_point(size = 5, shape=18) + 
   geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
@@ -232,11 +234,11 @@ pgs.insuf.error.cond <- pgs.insuf.indiv[ ,list(mean = mean(error),
                                 ci_high  = CI(error)["upper"]), 
                          by=condition]
 
-ggplot(pgs.insuf.error.cond, aes(condition, mean, color=condition)) +
+p.pgs.insuf.error.cond <- ggplot(pgs.insuf.error.cond, aes(condition, mean, color=condition)) +
   geom_hline(yintercept=0, linetype="dashed")+
   geom_point(size = 5, shape=18) + 
   geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
-  labs(x="Condition", y="Individual Error in Insufficient Capacity Recall") +
+  labs(x="Condition", y="Error in Insufficient Capacity Recall") +
   theme_bw(base_size=16)
 
 
@@ -250,7 +252,7 @@ pgs.insuf.cond <- merge(pgs.insuf.indiv[ ,list(mean_resp     = mean(response),
                                         by=condition],
                         by="condition")
 
-ggplot(pgs.insuf.cond, aes(mean_true, mean_resp, color=condition)) + 
+p.pgs.insuf.cond <- ggplot(pgs.insuf.cond, aes(mean_true, mean_resp, color=condition)) + 
   geom_abline(yintercept=0, slope=1, linetype="dashed") +
   geom_point(size = 5, shape=18) + 
   geom_errorbar(aes(ymin=ci_low_resp, ymax=ci_high_resp), width=.25) +
@@ -267,12 +269,16 @@ col.cond <- blocks[,list(mean = mean(collector),
                          ci_high  = CI(collector)["upper"]), 
                    by=c("condition")]
 
-ggplot(col.cond, aes(condition, mean, color=condition)) + 
-  geom_hline(yintercept=5, linetype="dashed")+
+p.col.cond <- ggplot(col.cond, aes(x=1, y=mean, color=condition)) + 
+  geom_hline(data = rational.benchmarks[measure=="cost"],
+             aes(yintercept=benchmark/50, color=condition),
+             linetype="dashed", size=1.1) +
   geom_point(size = 5, shape=18) + 
-  geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
-  #scale_y_continuous(limits=c(3.5,6.5), breaks=seq(3.5,6.5,.5)) +
+  geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.1) +
+  scale_y_continuous(limits=c(4,7), breaks=seq(4,7,.5)) +
+  scale_x_continuous(breaks=NULL) +
   labs(x="Condition", y="Collector Size") +
+  facet_grid(. ~ condition) +
   theme_bw(base_size=16)
 
 col.cond.block <- blocks[,list(mean = mean(collector),
@@ -280,11 +286,13 @@ col.cond.block <- blocks[,list(mean = mean(collector),
                                ci_high  = CI(collector)["upper"]), 
                          by=c("condition","block")]
 
-ggplot(col.cond.block, aes(factor(block), mean, color=condition)) + 
+p.col.cond.block <- ggplot(col.cond.block, aes(factor(block), mean, color=condition)) + 
   geom_point(size = 3, shape=1) + 
   #geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
   geom_line(aes(factor(block), mean, group=condition)) +
-  geom_hline(yintercept=5, linetype="dashed")+
+  geom_hline(data = rational.benchmarks[measure=="cost"],
+             aes(yintercept=benchmark/50, color=condition),
+             linetype="dashed", size=1.1) +
   geom_smooth(aes(group=1), method="lm") +
   labs(x="Bock", y="Collector Size") +
   facet_grid(. ~ condition) +
@@ -312,7 +320,7 @@ exp.dec.err.cond.block <- cum.coin.indiv.block[!is.na(exp_dec_err),
                                               ci_high  = CI(exp_dec_err)["upper"]), 
                                          by=c("condition","block")]
 
-ggplot(exp.dec.err.cond.block, aes(factor(block), mean, color=condition)) + 
+p.exp.dec.err.cond.block <- ggplot(exp.dec.err.cond.block, aes(factor(block), mean, color=condition)) + 
   geom_point(size = 3, shape=1) + 
   #geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
   geom_line(aes(factor(block), mean, group=condition)) +
@@ -349,9 +357,20 @@ rational.profit.cond.strat <- rational.profit.indiv.strat[, list(mean_profit=mea
                                                                  mean_revenue = mean(revenue)),
                                                           by=c("condition","collector")]
 
-ggplot(rational.profit.cond.strat, aes(collector, mean_profit, color=condition))+
-  geom_line(shape=1) +
-  theme_bw()
+p.rational.profit.cond.strat <- ggplot(rational.profit.cond.strat, 
+                                       aes(collector, mean_profit, color=condition))+
+  geom_hline(data = rational.benchmarks[measure=="profit"],
+             aes(yintercept=benchmark, color=condition),
+             linetype="dashed")+ 
+  geom_vline(data = rational.benchmarks[measure=="cost"],
+             aes(xintercept=benchmark/50, color=condition),
+             linetype="dashed")+ 
+  geom_line(size=1.3) +
+  scale_x_continuous(breaks=1:10) +
+  labs(x="Collector Size",
+       y="Profit after 100 rounds",
+       color="Condition") +
+  theme_bw(base_size=16)
 
 
 # behavior as fit by model of salient events weighted
@@ -365,11 +384,11 @@ rounds[, capacity_short  := min(collector - coins_avail, 0), by=log_id]
 rounds[, capacity_error  := collector-coins_avail, by=log_id]
 
 
-rounds[, list(rational_revenue = min(7, coins_avail),
-              rationa_cost     = 7*5), by=log_id]
-rational.rev.indiv <- rounds[, list(condition=unique(condition),
-                                    rational_revenue = sum(rational_revenue)), 
-                                    by=user_id]
+# rounds[, list(rational_revenue = min(7, coins_avail),
+#               rationa_cost     = 7*5), by=log_id]
+# rational.rev.indiv <- rounds[, list(condition=unique(condition),
+#                                     rational_revenue = sum(rational_revenue)), 
+#                                     by=user_id]
 
 
 
@@ -407,12 +426,12 @@ profit.cond <- rbindlist(list(profit.indiv[,list(measure = "cost",
                                                 ci_high = CI(profit)["upper"]),
                                            by=condition]))
 
-profit.cond[, measure := factor(measure, levels=c("cost","revenue","profit"))]
+profit.cond[, measure := factor(measure, levels=c("cost","revenue","profit"), ordered=TRUE)]
 
 
 
-ggplot(profit.cond, aes(condition, mean, color=condition)) + 
-  geom_hline(data=profit.ref.pts, aes(yintercept=benchmark), linetype="dashed") +
+p.profit.cond <- ggplot(profit.cond, aes(condition, mean, color=condition)) + 
+ # geom_hline(data=profit.ref.pts, aes(yintercept=benchmark), linetype="dashed") +
   geom_point(size = 5, shape=18) + 
   geom_errorbar(aes(ymin=ci_low, ymax=ci_high), width=.25) +
   labs(x="Condition", y="Coins") +
@@ -437,7 +456,9 @@ profit.cond.block <- rbindlist(list(profit.indiv.block[,list(measure = "cost",
                                                              ci_high = CI(profit)["upper"]),
                                                        by=c("condition","block")]))
 
-ggplot(profit.cond.block, aes(factor(block), mean, color=condition)) + 
+profit.cond.block[, measure := factor(measure, levels=c("cost","revenue","profit"), ordered=TRUE)]
+
+p.profit.cond.block <- ggplot(profit.cond.block, aes(factor(block), mean, color=condition)) + 
   geom_point(size = 3, shape=1) + 
   geom_line(aes(factor(block), mean, group=condition)) +
   geom_hline(data=rational.benchmarks, aes(yintercept=benchmark/10), linetype="dashed") +

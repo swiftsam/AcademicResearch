@@ -1,0 +1,82 @@
+```{r echo=FALSE, message=FALSE}
+source("CCG Analysis.R")
+````
+
+CCG Results
+========================================================
+
+Methods
+-------------------------
+Participants played 100 rounds of the Coin Capacity Game ([v1.0](https://github.com/swiftsam/CoinCapacityGame/tree/1.0)).  At the beginning of each round, between 0 and 10 coins appeared.  Participants were able to collect and deposit the coins which appeared up to the size of the 'collector' tool they currently owned in the game.  Participants decided how large of a collector to invest in before each block of 10 rounds.  Collectors last 10 rounds and cost 5 times their capacity in coins. See a screenshots of the [participant instructions](http://i.imgur.com/v67MCFN.png), [collector decision]((http://i.imgur.com/v67MCFN.png)), and [typical round](http://i.imgur.com/8rOPRun.png).
+
+### Manipulation
+We randomly assigned particpants to one of 4 conditions which varied the distribution from which the number of coins appearing each round was drawn.  In each condition, the mean number of coins per round was 5 of the possible 10, and all conditions had the opportunity to collect a total of exactly 500 coins.  All participants within each condition saw the exact same set of outcomes, but the order was randomized.
+
+The four distribution conditions were 
+* normal
+* uniform
+* gamma-left (truncated)
+* gamma-right (truncated)
+
+For the gamma distributions, the substantial mass which would exist outside the [0,10] range was pooled into nearest bin inside the range (code used to produce distributions [available here](https://github.com/swiftsam/research/blob/master/CCG%20setup.R)).  This creates an interesting environment for participants as the most frequent observed outcome is also the least typical outcome.  
+
+#### Figure 1. Distribution of coins per round in each condition.
+_Means are denoted as dashed lines, medians as dotted lines_
+```{r fig.width=9, fig.height=6, echo=FALSE}
+p.coin.dist.cond
+```
+
+Results
+-------------------------
+### Perceptions
+We asked participants two questions after each block of 10 rounds concerning their perception of the number of coins which had appeared.
+
+1. "How many coins appeared each round, on average, over the last 10 rounds?"
+2. "How many coins appeared each round, on average, since the beginning of the game?"
+
+Participants in the gamma-left condition reported that there had been more coins in the last 10 rounds than participants in the other conditions.  Participants in both gamma distributed conditions also reported significantly different experiences than the objective mean of 5 coins per round, with gamma-left participants recalling more coins and gamma-right recalling fewer than 5 coins per round.
+#### Figure 2. Perception of mean coins-per-round in previous block.
+_Dashed line indicates true overall average of 5 coins per round_
+```{r fig.width=9, fig.height=6, echo=FALSE}
+p.pbs1.cond.block
+```
+
+Because each participant's experience was ordered randomly, not all blocks had a mean of 5, so we should compare their judgments to the actual series of rounds they experienced.  Participants in the gamma-left condition recall .3 more coins per round than they experienced, while the other conditions recall fewer that what occured.  
+#### Figure 3. Error in estimation of previous-block coins.
+_Dashed line indicates accurate recall;  Error bars represent 95% CI of the mean_
+```{r fig.width=9, fig.height=6, echo=FALSE}
+p.error.coin.cond
+```
+
+
+Similarly, judgments of the mean number of coins since the beginning of the game show overesitmates by the gamma-left participants, and under-estimates by the gamma-right and normal participants.  No strong learning trends emerge in any condition.
+#### Figure 4. Perception of mean coins-per-round in all preceding rounds.
+_Dashed line indicates accurate recall;  Error bars represent 95% CI of the mean_
+```{r fig.width=9, fig.height=6, echo=FALSE}
+p.error.cum.cond.block
+```
+
+Participants also made two estimates at the end of the game
+
+1. "How many times was your collector too small for the coins that appeared?"
+2. "If you had to play again now and pick one collector for all rounds, what size would you pick?"
+
+### Decisions
+Participants were required to invest in a collector before each block of 10 rounds.  Collectors varied in their capacity which ranged from 1 to 10 coins, and cost (in coins) 5 times their capacity.  It was possible to make a profit by collecting more coins in each block than was spent on the collector.  We endowed participants with 50 coins at the beginning of the game, so the initial investment decision was not constrained.
+
+Profit potential and optimal strategy were not the same in each condition.  Figure 5 shows the profit which would have been acheived by a participant who selected a collector of given size in all 10 blocks.  Note that the profit maximizing decision in this environment is to select a collector which matches the median of the participant's distribution.
+#### Figure 4. Profit from constant collector-size strategies by condition
+_Dashed lines indicate optimal decisions by condition_
+```{r fig.width=9, fig.height=6, echo=FALSE}
+p.rational.profit.cond.strat
+```
+Participants made 10 decisions each
+
+
+
+
+### Outcomes
+The 
+
+
+
