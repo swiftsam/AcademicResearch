@@ -5,7 +5,7 @@ source("CCG Analysis.R")
 Coin Capacity Game: Study 1
 ========================================================
 *Sam Swift, Adrian Camilleri, and Rick Larrick*   
-*2014-02-16*
+*2014-02-21*
 
 Methods
 -------------------------
@@ -70,7 +70,7 @@ p.error.cum
 Participants were required to invest in a collector before each block of 10 rounds.  Collectors varied in their capacity which ranged from 1 to 10 coins, and cost which was always (in coins) 5 times their capacity.  It was possible to make a profit by collecting more coins in each block than was spent on the collector.  We endowed participants with 50 coins at the beginning of the game, so the initial investment decision was not constrained.
 
 Profit potential and optimal strategy were not the same in each condition.  Figure 5 shows the profit which would have been acheived by a participant who selected a collector of given size in all 10 blocks.  Note that the profit maximizing decision in this environment is to select a collector which matches the median of the participant's distribution.
-#### Figure 4. Profit from constant collector-size strategies.
+#### Figure 5. Profit from constant collector-size strategies.
 _Dashed lines indicate profit maximizing decisions by condition_
 
 ```{r fig.width=9, fig.height=6, echo=FALSE}
@@ -79,18 +79,18 @@ p.rational.profit.cond.strat
 
 Participants made a collector investment decision before each of the 10 rounds with the goal of maximizing profit (number of coins collected minus cost of the collector). 
 
-#### Figure 5. Collector investment decisions.
+#### Figure 6. Collector investment decisions.
 _Dotted lines indicate the overall mean level of 5 coins per round; Dashed lines indicate the profit-maximizing collector for each condition; Error bars represent 95% CI of the mean; Shaded region is SE of the linear trend across blocks_
 
 ```{r fig.width=9, fig.height=6, echo=FALSE}
 p.col.cond
 ```
 
-We did not give participants any information about the number of coins to expect (beyond the possible 0:10 range) or the process by which the number was generated each round. Since individual experience varies in each block, we can compare participant's decision each block with their cumulative experience to that point.  Figure 6 shows how decisions deviated from two models of their experience, the mean and (profit maximizing) median.
+We did not give participants any information about the number of coins to expect (beyond the possible 0:10 range) or the process by which the number was generated each round. Since individual experience varies in each block, we can compare participant's decision each block with their cumulative experience to that point.  Figure 7 shows how decisions deviated from two models of their experience, the mean and (profit maximizing) median.
 
 Participants in all conditions invest in collectors significantly larger than the mean or median of their experience, meaning they are carrying capacity in excess of what would be profit maximizing under either model.  The largest deviations are by participants in the gamma-right condition who invest on average in collectors 1.58 coins larger than the mean of what they have observed and 2.27 coins larger than the median of obverved rounds.  Participants in the gamma-right and normal conditions exhibit significant downward treands in collector decisions, reflecting a reduced overcapacity with experience.  Participants in the gamma-left condition exhibit considerable consistency with their median experience, although the consistency is largely driven by a higher median (converging to 6) rather than smaller investments.
 
-#### Figure 6. Collector investment decisions relative to mean & median of experience.
+#### Figure 7. Collector investment decisions relative to mean & median of experience.
 _Dashed lines indicate decisions corresponding to experience; Error bars represent 95% CI of the mean; Shaded region is SE of the linear trend across blocks_
 
 ```{r fig.width=9, fig.height=6, echo=FALSE}
@@ -100,11 +100,11 @@ p.dec.diff
 ### Outcomes
 We can track three outcomes from participant's collector investment decisions: cost (number of coins paid for collector), revenue (number of coins collected), and profit (difference in cost and revenue per block).
 
-Figure 7 shows these three outcomes for each condition and across the 10 blocks in the study.  Dashed lines indicate the theoretical optimium outcomes for a partipant who selected the collector which matched the median coins per round for their condition for all 10 blocks.  We present this benchmark as a reference point rather than a rational expectation since the median is only revealed through experience.
+Figure 8 shows these three outcomes for each condition and across the 10 blocks in the study.  Dashed lines indicate the theoretical optimium outcomes for a partipant who selected the collector which matched the median coins per round for their condition for all 10 blocks.  We present this benchmark as a reference point rather than a rational expectation since the median is only revealed through experience.
 
-Participants in all conditions underperformed the theoretical maximum profit, but for different reasons.  Participants in the normal and uniform conditions collected near-optimal numbers of coins, but did so while carrying extra capacity (compared to 5, cost=25/block) and thus achieved lower than the ideal profits.  Participants in the gamma-right condition collected more than the optimal number of coins by investing in far more than the ideal capacity for their condition (4, cost=20/block) and acheived less than ideal profit as well.  Those in the gamma-left condition aquired collects of nearly ideal size (6, cost=30/block) on average and acheived nearly ideal revenues and profits.  The shortfall in that case - despite appropriate invesment, on average - is a result of the asymmetric relationship between cost and revenue such that errors of undercapacity hurt profits less than errors of overcapacity.
+Participants in all conditions underperformed the theoretical maximum profit, but for different reasons.  Participants in the normal and uniform conditions collected near-optimal numbers of coins, but did so while carrying extra capacity (compared to 5, cost=25/block) and thus achieved lower than the ideal profits.  Participants in the gamma-right condition collected more than the optimal number of coins by investing in far more than the ideal capacity for their condition (4, cost=20/block) and acheived less than ideal profit as well.  Those in the gamma-left condition aquired collectors of the ideal size (6, cost=30/block) on average, and generated revenue which converged to the ideal level.  Overall profits still lagged the ideal however since the ideal mean of decisions is composed of rounds with over and under-investment.
 
-#### Figure 7. Cost, Revenue, and Profit outcomes.
+#### Figure 8. Cost, Revenue, and Profit outcomes.
 _Dashed lines indicate outcome from profit maximizing static strategy (collector = median coins/rd); Error bars represent 95% CI of the mean; Shaded region is SE of the linear trend across blocks_
 
 ```{r fig.width=9, fig.height=9, echo=FALSE}
@@ -119,16 +119,16 @@ Participants also made two estimates at the end of the game:
 
 The first question was designed to measured perceptions of insufficient capacity which we hypothesized would drive decisions to overinvest.  Figure 8 compares participants' estimates to the actual number of rounds in which their collector was too small to collect all of the available coins.  Participants in all conditions actually underestimated the number of rounds on which their collector was insufficient.  Participants in the gamma-left and uniform conditions made the highest estimates but also underestimated the true frequency by the most (visualized as the perpendicular distance to the dashed identity line).
 
-#### Figure 8. True and recalled frequency of insufficient capacity.
+#### Figure 9. True and recalled frequency of insufficient capacity.
 _Dashed line represents accurate recall; Error bars represent 95% CI of the mean_
 
 ```{r fig.width=9, fig.height=6, echo=FALSE}
 p.pgs.insuf.cond
 ```
 
-Figure 9 compares participants' post-game judgment of the best collector size to their choices in the first and last blocks during the game.  Post game judgments are higher than first block decisions in all conditions (although not significantly by condition), and near 5 in all cases.  The similarity in post-game judgments reflects limited response to the different environments by condition.
+Figure 10 compares participants' post-game judgment of the best collector size to their choices in the first and last blocks during the game.  Post game judgments are higher than first block decisions in all conditions (although not significantly by condition), and near 5 in all cases.  The similarity in post-game judgments reflects limited response to the different environments by condition.
 
-#### Figure 9. Post-game judgment of optimal capacity.
+#### Figure 10. Post-game judgment of optimal capacity.
 _Dotted lines indicate the overall mean level of 5 coins per round; Dashed lines indicate the profit-maximizing collector for each condition; Error bars represent 95% CI of the mean_
 
 ```{r fig.width=9, fig.height=6, echo=FALSE}
@@ -138,7 +138,7 @@ p.pgs.col.cond
 ### Conclusions
 
 #### Paradigm
-As the first experiment in this paradigm, our goals were to establish the feasability of the task and the baseline accuracy of decision quality in different distribution environments.  With a completion rate of nearly 90% and median completion time around `r as.integer(median(users$total_time))` minutes for 100 rounds, and generally coherent responses, the Coin Capacity Game paradigm is off to a good start.
+As the first experiment in this paradigm, our goals were to establish the feasability of the task and the baseline accuracy of decision quality in different distribution environments.  With a completion rate of nearly 90% and median completion time around `r as.integer(median(users$total_time, na.rm=T))` minutes for 100 rounds, and generally coherent responses, the Coin Capacity Game paradigm is off to a good start.
 
 #### Perceptions
 The gamma distributions created systematic misperceptions of the experience. Participants in both gamma- conditions appeared to underweight the extreme modal bin and estimate a mean closer to the median.  Perceptions by participants in the uniform and control conditions were most similar to gamma-right, but showed less error, especially in the cumulative judgment.

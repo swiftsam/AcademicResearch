@@ -419,7 +419,7 @@ p.outcomes <- ggplot(profit.cond.block, aes(block, mean, color=condition)) +
 # perceptions and accuracy of coin dist post game
 
 pgs.coins.cond <- surveys[question=="slider-pgs2",
-                          list(measure = "post-game",
+                          list(measure = "Post-Game",
                                mean = mean(response),
                                ci_low   = CI(response)["lower"],
                                ci_high  = CI(response)["upper"]),
@@ -428,16 +428,17 @@ pgs.coins.cond <- surveys[question=="slider-pgs2",
 pgs.comparison <- rbind(pgs.coins.cond,
                         col.cond.block[block==1,
                                        list(condition = condition,
-                                            measure   = "first block",
+                                            measure   = "Block 1",
                                             mean      = mean,
                                             ci_low    = ci_low,
                                             ci_high   = ci_high)],
                         col.cond.block[block==10,
                                        list(condition = condition,
-                                            measure   = "last block",
+                                            measure   = "Block 10",
                                             mean      = mean,
                                             ci_low    = ci_low,
-                                            ci_high   = ci_high)])
+                                            ci_high   = ci_high)],
+                        col.cond[,list(condition, measure="Overall",mean,ci_low,ci_high)])
 
 p.pgs.col.cond <- ggplot(pgs.comparison, aes(measure, mean, color=condition)) + 
   geom_hline(data = rational.benchmarks[measure=="cost"],
