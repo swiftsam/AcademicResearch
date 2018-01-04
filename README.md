@@ -1,4 +1,4 @@
-# Contact me:
+### Contact me:
 * Sam Swift
 * samswift@gmail.com
 * http://swift.pw
@@ -11,7 +11,7 @@ As an academic, I believe strongly in the importance of open methodology.  As an
 
 Studies are identified by 3 or 4 letter codes.  The following index should explain what the codes correspond to.  Most of the analyses automatically pull data from http://samswift.org/data but you can also browse the data there which is organized with the same codes.
 
-#Published Papers
+### Published Papers
 Don A Moore, Samuel A Swift, Zachariah S Sharek, Francesca Gino (2010). Correspondence Bias in Performance Evaluation: Why Grade Inflation Works. Personality and Social Psychology Bulletin 36 (6) p.843-852
  * SCSC3: Experiment 1 
  * SCSC2: Experiment 2
