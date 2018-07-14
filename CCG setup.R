@@ -54,7 +54,7 @@ sets$value <- NULL
 sets <- rbind(sets, data.frame(variable="uniform", coins= 5)) # uniform needs 1 extra since 9*11=99
 
 # intialize output data.frame
-seqs <- data.frame()
+seqs <- data.table()
 
 # generate N participant sequences for each condition
 conds <- levels(sets$variable)
@@ -69,10 +69,10 @@ for(cond in conds){
                            collapse=""), 
                      sep="")
     
-    seqs <- rbind.fill(seqs,
-                       data.frame("UserID" = user.id,
+    seqs <- rbindlist(list(seqs,
+                       data.table("UserID" = user.id,
                                   "Round"  = 1:100,
-                                  "Coins"  = coins))    
+                                  "Coins"  = coins)))    
   }  
 }
 
