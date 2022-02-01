@@ -1,7 +1,7 @@
 ### Contact me:
 * Sam Swift
 * samswift@gmail.com
-* http://swift.pw
+* https://swift.pw
 
 I am a post-doc working with the Good Judgment Team based at UC Berkeley and UPenn on a forecasting tournament sponsored by IARPA.  I graduated from CMU in May 2012 and am currently working from the Fuqua School of Business at Duke as a visiting scholar.
 
